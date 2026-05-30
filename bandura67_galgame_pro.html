@@ -1,0 +1,3987 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>《是誰在中原留下的醬板鴨》</title>
+    <!-- Google Fonts: 粗野大字體與像素字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+TC:wght@400;700;900&family=DotGothic16&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons (用於系統卡片) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --meme-yellow: #FFDE00;
+            --meme-pink: #FF0055;
+            --meme-cyan: #00E5FF;
+            --meme-dark: #111111;
+            --meme-white: #FFFFFF;
+            --meme-green: #00FF41;
+            --cg1-image: url('./image/cg1.jpg');
+            --cg2-image: url('./image/cg2.jpg');
+            --loading-image: url('./image/bg1.jpg');
+            --intro-loading-image: url('./image/bg2.jpg');
+        }
+
+        * {
+            cursor: none !important; /* 隱藏原生游標 */
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #222;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ----- 新粗野主義核心 Class ----- */
+        .brutal-border { border: 8px solid var(--meme-dark); }
+        .brutal-border-sm { border: 4px solid var(--meme-dark); }
+        .brutal-shadow { box-shadow: 12px 12px 0 var(--meme-dark); }
+        .brutal-shadow-sm { box-shadow: 6px 6px 0 var(--meme-dark); }
+        .brutal-shadow-white { box-shadow: 8px 8px 0 var(--meme-white); }
+        
+        /* 按鈕互動設計 */
+        .brutal-btn {
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        .brutal-btn:hover {
+            background-color: var(--meme-pink) !important;
+            color: var(--meme-white) !important;
+            transform: translate(-4px, -4px);
+            box-shadow: 16px 16px 0 var(--meme-dark);
+        }
+        .brutal-btn:active, .brutal-btn.simulated-active {
+            transform: translate(8px, 8px) !important;
+            box-shadow: 4px 4px 0 var(--meme-dark) !important;
+        }
+
+        /* 字體類別 */
+        .impact-font { font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif; letter-spacing: 2px; }
+        .pixel-font { font-family: 'DotGothic16', 'Noto Sans TC', sans-serif; }
+        .pixel-sharp {
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 rgba(17, 17, 17, 0.2);
+        }
+
+        /* ----- 遊戲場景容器 ----- */
+        #game-container {
+            width: 1280px;
+            height: 720px;
+            background-color: var(--meme-white);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+
+        /* 首頁專用背景圖（進入劇情後會一起隱藏） */
+        #start-screen {
+            overflow: hidden;
+        }
+
+        #start-screen::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: linear-gradient(120deg, rgba(0, 0, 0, 0.42), rgba(255, 255, 255, 0.08)), url('./image/跟著韻律動次動_.gif');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 0;
+        }
+
+        #start-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.36);
+            z-index: 1;
+        }
+
+        #start-screen > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        #game-screen {
+            transform-origin: center;
+            background: #050505;
+        }
+
+        #game-placeholder-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: #050505 url('./image/bg_星巴克.jpg') center center / contain no-repeat;
+            image-rendering: auto;
+        }
+
+        /* ===== 前導 CG 序列 ===== */
+        #intro-sequence {
+            position: absolute;
+            inset: 0;
+            z-index: 180;
+            display: none;
+            overflow: hidden;
+            background: #050505;
+            cursor: pointer;
+        }
+
+        #intro-sequence.active {
+            display: block;
+        }
+
+        #cg-frame {
+            position: absolute;
+            inset: 26px;
+            border: 10px solid #ffffff;
+            box-shadow: 0 0 0 8px #111111;
+            overflow: hidden;
+            background: #111;
+        }
+
+        .cg-panel {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease;
+        }
+
+        #cg1-panel {
+            background-image: var(--cg1-image);
+            transform: translateX(0);
+            z-index: 2;
+        }
+
+        #cg2-panel {
+            background-image: var(--cg2-image);
+            transform: translateX(100%);
+            z-index: 1;
+        }
+
+        #cg3-panel {
+            background: #050505;
+            transform: translateX(100%);
+            z-index: 0;
+        }
+
+        #cg3-left-sprite {
+            position: absolute;
+            left: 36px;
+            bottom: 18px;
+            width: 300px;
+            height: 440px;
+            background: linear-gradient(180deg, #2a2a2a 0%, #0f0f0f 100%);
+            border: 7px solid #fff;
+            box-shadow: 0 0 0 6px #111;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 20px;
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        #cg3-left-sprite i {
+            display: none;
+        }
+
+        #cg3-left-sprite img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+            margin-bottom: 0;
+            transform: translateY(18px);
+            z-index: 1;
+        }
+
+        #cg3-left-sprite span {
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            border: 4px solid #fff;
+            padding: 4px 10px;
+            background: #111;
+            position: absolute;
+            left: 50%;
+            bottom: 4px;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        #cg-frame.to-cg3 #cg3-left-sprite {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #cg-frame.to-cg2 #cg1-panel {
+            transform: translateX(-96%) scaleX(0.82);
+        }
+
+        #cg-frame.to-cg2 #cg2-panel {
+            transform: translateX(0);
+        }
+
+        #cg-frame.to-cg3 #cg2-panel {
+            transform: translateX(-90%) scaleX(0.84);
+            opacity: 0;
+        }
+
+        #cg-frame.to-cg3 #cg3-panel {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        #cg-frame.to-cg3 #cg1-panel {
+            opacity: 0;
+        }
+
+        #cg-frame.to-cg3 {
+            background: #000;
+        }
+
+        #cg1-phone-focus {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 430px;
+            height: 760px;
+            transform: translate(-50%, -50%);
+            border: 10px solid #111;
+            border-radius: 34px;
+            box-shadow: 0 0 0 8px #fff, 0 26px 40px rgba(0, 0, 0, 0.58);
+            background: linear-gradient(165deg, #ececec 0%, #bbbbbb 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: phoneJitter 0.18s infinite;
+            cursor: pointer;
+        }
+
+        #cg1-phone-focus::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 50%;
+            width: 110px;
+            height: 10px;
+            border-radius: 40px;
+            background: #222;
+            transform: translateX(-50%);
+        }
+
+        #cg1-phone-screen {
+            width: 88%;
+            height: 86%;
+            background: repeating-linear-gradient(0deg, #f5f5f5 0, #f5f5f5 5px, #ececec 5px, #ececec 10px);
+            border: 5px solid #111;
+            display: flex;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 36px;
+            color: #111;
+            text-align: center;
+            line-height: 1.35;
+            padding: 18px;
+        }
+
+        #cg1-notification {
+            position: absolute;
+            left: 14px;
+            right: 14px;
+            top: 18px;
+            border: 4px solid #111;
+            background: #fff;
+            color: #111;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 23px;
+            line-height: 1.45;
+            padding: 10px 12px;
+            box-shadow: 6px 6px 0 #111;
+            opacity: 0;
+            transform: translateY(-16px);
+            pointer-events: none;
+        }
+
+        #cg1-notification.show {
+            animation: noticePopIn 0.36s ease forwards;
+        }
+
+        @keyframes noticePopIn {
+            0% { opacity: 0; transform: translateY(-16px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        #cg1-click-hint {
+            position: absolute;
+            bottom: 26px;
+            right: 28px;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 20px;
+            color: #fff;
+            background: rgba(17, 17, 17, 0.9);
+            border: 3px solid #fff;
+            padding: 6px 12px;
+            animation: pulseHint 0.9s infinite;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { opacity: 0.45; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes phoneJitter {
+            0% { transform: translate(-50%, -50%) rotate(-0.8deg); }
+            50% { transform: translate(-49.4%, -50.4%) rotate(0.8deg); }
+            100% { transform: translate(-50%, -50%) rotate(-0.6deg); }
+        }
+
+        #phone-chat-stage {
+            position: absolute;
+            right: 56px;
+            top: 50%;
+            width: 430px;
+            height: 700px;
+            transform: translateY(-50%) translateX(120%);
+            z-index: 190;
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease;
+        }
+
+        #phone-chat-stage.active {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+        }
+
+        #phone-chat-stage.out {
+            opacity: 0;
+            transform: translateY(-50%) translateX(-18%);
+            pointer-events: none;
+        }
+
+        #phone-chat-stage.out #phone-chat-shell {
+            display: none;
+        }
+
+        #cg3-thought-stage {
+            position: absolute;
+            left: 410px;
+            top: 38%;
+            width: 780px;
+            min-height: 380px;
+            transform: translateY(-50%) translateX(120%);
+            z-index: 192;
+            opacity: 0;
+            transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.45s ease;
+            pointer-events: none;
+        }
+
+        #cg3-thought-stage.active {
+            transform: translateY(-50%) translateX(0);
+            opacity: 1;
+        }
+
+        #cg3-thought-bubble {
+            background: #fff;
+            border: 9px solid #111;
+            box-shadow: 12px 12px 0 #111;
+            padding: 22px 24px 22px 80px;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 38px;
+            line-height: 1.45;
+            letter-spacing: 1px;
+            font-weight: 900;
+            color: #111;
+            position: relative;
+            border-radius: 42% 50% 46% 54% / 28% 38% 36% 34%;
+        }
+
+        #cg3-thought-bubble::before {
+            content: '';
+            position: absolute;
+            left: -34px;
+            bottom: 66px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #fff;
+            border: 5px solid #111;
+            box-shadow: 5px 5px 0 #111;
+        }
+
+        #cg3-thought-bubble::after {
+            content: '';
+            position: absolute;
+            left: -62px;
+            bottom: 38px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff;
+            border: 4px solid #111;
+            box-shadow: 4px 4px 0 #111;
+        }
+
+        #chat-continue-hint {
+            position: absolute;
+            right: 34px;
+            bottom: 28px;
+            color: #fff;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 22px;
+            border: 3px solid #fff;
+            background: rgba(17, 17, 17, 0.92);
+            padding: 6px 12px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            pointer-events: none;
+            z-index: 196;
+        }
+
+        #chat-continue-hint.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #phone-chat-shell {
+            width: 100%;
+            height: 100%;
+            background: #f7f7f7;
+            border: 9px solid #111;
+            border-radius: 34px;
+            box-shadow: 0 0 0 6px #fff, 16px 16px 0 #111;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #phone-chat-header {
+            padding: 14px 16px;
+            background: #111;
+            color: #fff;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 22px;
+            border-bottom: 4px solid #fff;
+        }
+
+        #phone-chat-body {
+            flex: 1;
+            padding: 16px;
+            overflow: hidden;
+            background: repeating-linear-gradient(0deg, #f7f7f7 0, #f7f7f7 8px, #efefef 8px, #efefef 16px);
+        }
+
+        .chat-bubble {
+            max-width: 92%;
+            border: 4px solid #111;
+            box-shadow: 6px 6px 0 #111;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 24px;
+            line-height: 1.5;
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        .chat-bubble.show {
+            animation: bubbleIn 0.35s ease forwards;
+        }
+
+        .chat-bubble.from-huang {
+            background: #fff;
+            color: #111;
+        }
+
+        .chat-bubble.os {
+            background: #111;
+            color: #fff;
+            margin-left: auto;
+            clip-path: polygon(0 0, 95% 0, 100% 20%, 100% 100%, 5% 100%, 0 80%);
+        }
+
+        @keyframes bubbleIn {
+            0% { opacity: 0; transform: translateY(14px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        #intro-loading-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 195;
+            background-image: linear-gradient(120deg, rgba(17, 17, 17, 0.4), rgba(255, 255, 255, 0.06)), var(--intro-loading-image);
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        #intro-loading-screen.active {
+            opacity: 1;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+
+        #intro-loading-box {
+            position: absolute;
+            right: 26px;
+            bottom: 22px;
+            width: 360px;
+            padding: 10px;
+            border: 5px solid #fff;
+            background: rgba(17, 17, 17, 0.92);
+            color: #fff;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 19px;
+            box-shadow: 8px 8px 0 #111;
+        }
+
+        #intro-loading-track {
+            margin-top: 8px;
+            height: 18px;
+            border: 3px solid #fff;
+            background: #222;
+            overflow: hidden;
+        }
+
+        #intro-loading-fill {
+            width: 0;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, #fff 0, #fff 10px, #d0d0d0 10px, #d0d0d0 20px);
+            transition: width 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* 漫畫網點背景 */
+        .halftone-bg {
+            background-image: radial-gradient(#aaa 20%, transparent 20%);
+            background-size: 12px 12px;
+            background-position: 0 0;
+        }
+
+        /* CRT 掃描線濾鏡 (增加遊戲感) */
+        .crt-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 800;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        /* ----- 巨大化像素游標 ----- */
+        #custom-cursor {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 64px;
+            height: 64px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23FFFFFF" stroke="%23111111" stroke-width="2" stroke-linejoin="round"><path d="M4 2L18 14H11L8 22L4 2Z"/></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 9999;
+            transform-origin: top left;
+            transition: transform 0.05s ease;
+            filter: drop-shadow(6px 6px 0px rgba(17,17,17,1));
+        }
+        #custom-cursor.clicking { transform: scale(0.8) rotate(-15deg); }
+
+        /* ----- 角色立繪系統 ----- */
+        .sprite {
+            position: absolute;
+            bottom: -92px;
+            width: 360px;
+            height: 700px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(100px) scale(0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            z-index: 10;
+        }
+        .sprite.active { opacity: 1; transform: translateY(0) scale(1); }
+        .sprite.focus { z-index: 20; filter: brightness(1); }
+        .sprite.unfocus { filter: brightness(0.5); }
+        
+        .sprite-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-top: 0;
+            overflow: hidden;
+            position: relative;
+            background: transparent;
+        }
+
+        .sprite-placeholder.is-art {
+            align-items: flex-end;
+            padding-top: 0;
+            background: transparent;
+        }
+
+        .sprite-art {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center bottom;
+            display: block;
+            transform: scale(1.1);
+            transform-origin: center bottom;
+        }
+        
+        #sprite-A { left: 10%; }
+        #sprite-A .sprite-art {
+            transform: scale(1.02) translateX(2px) translateY(2px);
+        }
+        
+        #sprite-B { left: 50%; transform: translateX(-50%) translateY(100px) scale(0.9); }
+        #sprite-B.active { transform: translateX(-50%) translateY(0) scale(1); }
+        #sprite-B .sprite-art {
+            transform: scale(1.24) translateX(0) translateY(4px);
+        }
+
+        #sprite-C { right: 10%; }
+        #sprite-C .sprite-art {
+            transform: scale(1.14) translateX(-2px) translateY(6px);
+        }
+
+        /* ----- 動畫特效 ----- */
+        .shake { animation: shake 0.3s infinite cubic-bezier(0.36,0.07,0.19,0.97); }
+        .crazy-shake { animation: crazyShake 0.1s infinite; }
+        .camera-tilt-shake { animation: cameraTiltShake 0.38s cubic-bezier(0.2, 0.8, 0.2, 1); }
+        .freeze-frame { filter: grayscale(1) contrast(1.5); }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-8px, 0, 0); }
+            40%, 60% { transform: translate3d(8px, 0, 0); }
+        }
+        @keyframes crazyShake {
+            0% { transform: translate(5px, 5px) rotate(2deg); filter: hue-rotate(90deg); }
+            50% { transform: translate(-5px, -5px) rotate(-2deg); filter: hue-rotate(180deg); }
+            100% { transform: translate(5px, -5px) rotate(0deg); }
+        }
+
+        @keyframes cameraTiltShake {
+            0% { transform: rotate(-8deg) translateX(-16px); }
+            25% { transform: rotate(6deg) translateX(10px); }
+            50% { transform: rotate(-4deg) translateX(-6px); }
+            100% { transform: rotate(0deg) translateX(0); }
+        }
+
+        /* 系統卡片彈出動畫 */
+        @keyframes slideInRight {
+            0% { transform: translateX(100%) skewX(10deg); opacity: 0; }
+            100% { transform: translateX(0) skewX(0); opacity: 1; }
+        }
+        .system-card {
+            animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 畫面濾鏡 */
+        #screen-filter {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .filter-alert { background: rgba(255, 0, 85, 0.4); opacity: 1 !important; mix-blend-mode: multiply; }
+        .filter-glitch { background: rgba(0, 229, 255, 0.3); opacity: 1 !important; mix-blend-mode: color-burn; animation: flash 0.1s infinite; }
+        
+        @keyframes flash { 0% { opacity: 0.8; } 50% { opacity: 0.3; } 100% { opacity: 0.8; } }
+
+        /* 打字機游標 */
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            margin-left: 4px;
+            color: var(--meme-pink);
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* Persona 5 銳角對話框風格 */
+        #dialog-area {
+            z-index: 90;
+            filter: drop-shadow(0 16px 0 rgba(0, 0, 0, 0.85));
+        }
+
+        #dialog-box {
+            position: relative;
+            overflow: hidden;
+            border: 6px solid var(--meme-dark);
+            background: linear-gradient(160deg, #ffffff 0%, #f5f5f5 100%);
+            clip-path: polygon(0 0, calc(100% - 52px) 0, 100% 36px, 100% 100%, 30px 100%, 0 calc(100% - 26px));
+            box-shadow: 0 0 0 4px #ffffff, 12px 12px 0 #111111;
+        }
+
+        #dialog-box::before {
+            content: '';
+            position: absolute;
+            right: 18px;
+            top: 14px;
+            width: 136px;
+            height: 6px;
+            background: var(--meme-pink);
+            transform: skewX(-35deg);
+        }
+
+        #name-tag-container {
+            top: -52px;
+        }
+
+        #name-tag {
+            clip-path: none;
+            box-shadow: 8px 8px 0 #111111;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            transform: rotate(-1.2deg);
+        }
+
+        #character-intro-sequence {
+            position: absolute;
+            inset: 0;
+            z-index: 140;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(17, 17, 17, 0.98);
+            overflow: hidden;
+        }
+
+        #character-intro-sequence.active {
+            display: flex;
+        }
+
+        #character-intro-start-card {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(17, 17, 17, 0.98);
+            animation: cardFadeOut 0.9s ease 2.8s forwards;
+            overflow: hidden;
+        }
+
+        #character-intro-start-card.hidden {
+            display: none;
+        }
+
+        #character-intro-start-card::before {
+            content: '';
+            position: absolute;
+            inset: -50%;
+            background: repeating-conic-gradient(from 0deg, transparent 0deg 10deg, rgba(255, 0, 85, 0.3) 10deg 20deg);
+            animation: rotateSpin 20s linear infinite;
+            z-index: 1;
+        }
+
+        #character-intro-start-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.08) 36%, rgba(0, 0, 0, 0.45) 100%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .character-intro-start-wrapper {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            transform: translateX(-44px) translateY(18px) rotate(-4deg);
+            animation: scaleInPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards;
+        }
+
+        .character-intro-start-badge {
+            background: var(--meme-yellow);
+            color: var(--meme-dark);
+            padding: 12px 28px;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 34px;
+            border: 5px solid var(--meme-dark);
+            transform: rotate(7deg) translate(168px, -42px);
+            box-shadow: 10px 10px 0 var(--meme-dark);
+            margin-bottom: 8px;
+            display: inline-block;
+            letter-spacing: 3px;
+        }
+
+        .character-intro-start-text {
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 156px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 10px;
+            text-shadow: 12px 12px 0px var(--meme-pink),
+                         -6px -6px 0px var(--meme-cyan),
+                         0 0 80px rgba(255, 0, 85, 0.85),
+                         0 0 50px rgba(255, 0, 85, 0.65);
+            animation: textPulse 1.2s ease-in-out infinite;
+            line-height: 0.96;
+            transform: skewX(-7deg);
+        }
+
+        @keyframes scaleInPop {
+            0% { transform: translateX(-120px) translateY(60px) scale(0.46) rotate(-12deg); opacity: 0; }
+            70% { transform: translateX(-26px) translateY(12px) scale(1.06) rotate(-2deg); opacity: 1; }
+            100% { transform: translateX(-44px) translateY(18px) scale(1) rotate(-4deg); opacity: 1; }
+        }
+
+        @keyframes rotateSpin {
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes textPulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.08); opacity: 0.9; }
+        }
+
+        #character-intro-video-container {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.18) 34%, rgba(0, 0, 0, 0.82) 100%),
+                linear-gradient(135deg, rgba(255, 0, 85, 0.16), rgba(0, 0, 0, 0.65) 44%, rgba(0, 229, 255, 0.18));
+        }
+
+        #character-intro-video-container.hidden {
+            display: none;
+        }
+
+        #character-intro-video-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, transparent, transparent 2px, rgba(255, 255, 255, 0.06) 2px, rgba(255, 255, 255, 0.06) 4px);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.52;
+        }
+
+        #character-intro-video-container::after {
+            content: '';
+            position: absolute;
+            inset: 20px;
+            border: 5px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 0 0 2px rgba(17, 17, 17, 0.8), 0 0 0 7px rgba(17, 17, 17, 0.9);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #character-intro-video-stage-badge {
+            position: absolute;
+            left: 28px;
+            top: 22px;
+            z-index: 4;
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: center;
+            column-gap: 14px;
+            row-gap: 6px;
+            padding: 12px 18px 10px;
+            border: 4px solid var(--meme-dark);
+            background: var(--meme-yellow);
+            color: var(--meme-dark);
+            box-shadow: 10px 10px 0 var(--meme-dark);
+            transform: rotate(-9deg);
+            clip-path: polygon(0 8%, 95% 0, 100% 86%, 3% 100%);
+        }
+
+        #character-intro-stage-key {
+            min-width: 58px;
+            padding: 4px 10px;
+            border: 3px solid var(--meme-dark);
+            background: #ffffff;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 34px;
+            line-height: 1;
+            text-align: center;
+            grid-row: 1 / span 2;
+        }
+
+        #character-intro-stage-name {
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 20px;
+            line-height: 1.15;
+            letter-spacing: 1px;
+        }
+
+        #character-intro-stage-sub {
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2px;
+            color: rgba(17, 17, 17, 0.78);
+            text-transform: uppercase;
+        }
+
+        #character-intro-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center center;
+            background: #000000;
+            transform: scale(1.03);
+            z-index: 0;
+        }
+
+        #character-intro-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 4;
+            display: flex;
+            gap: 12px;
+            background: #111111;
+            padding: 10px;
+            border-radius: 8px;
+            border: 4px solid var(--meme-yellow);
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.9), inset 0 0 0 2px #000000;
+        }
+
+        .video-controls-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 8;
+            display: flex;
+            gap: 12px;
+            background: #111111;
+            padding: 10px;
+            border-radius: 8px;
+            border: 4px solid var(--meme-yellow);
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.9), inset 0 0 0 2px #000000;
+        }
+
+        .mp4-progress-wrap {
+            position: absolute;
+            left: 50%;
+            bottom: 26px;
+            transform: translateX(-50%);
+            width: min(920px, calc(100% - 120px));
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        #character-intro-video-container:hover .mp4-progress-wrap,
+        #prelude-video-stage:hover .mp4-progress-wrap,
+        #inline-video-wrapper:hover .mp4-progress-wrap {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(-2px);
+        }
+
+        .mp4-progress-label {
+            align-self: flex-start;
+            padding: 6px 12px;
+            border: 3px solid #111111;
+            background: var(--meme-yellow);
+            color: #111111;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 18px;
+            letter-spacing: 1px;
+            box-shadow: 5px 5px 0 rgba(17, 17, 17, 0.9);
+        }
+
+        .mp4-progress-track {
+            width: 100%;
+            height: 28px;
+            border: 4px solid #ffffff;
+            background: rgba(17, 17, 17, 0.82);
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.9);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .mp4-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, var(--meme-cyan) 0, var(--meme-cyan) 12px, #ffffff 12px, #ffffff 24px);
+        }
+
+        .mp4-progress-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            width: 22px;
+            height: 38px;
+            transform: translate(-50%, -50%);
+            background: var(--meme-pink);
+            border: 4px solid #111111;
+            box-shadow: 4px 4px 0 #111111;
+            pointer-events: none;
+        }
+
+        .control-btn {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--meme-yellow);
+            border: 3px solid #000000;
+            color: #111111;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            box-shadow: 4px 4px 0 #000000;
+        }
+
+        .control-btn:hover {
+            background: #ffe74f;
+            transform: translate(-2px, -2px) rotate(-2deg);
+            box-shadow: 6px 6px 0 #000000;
+        }
+
+        .control-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000000;
+        }
+
+        #prelude-sequence {
+            position: absolute;
+            inset: 0;
+            z-index: 205;
+            display: none;
+            background: #000;
+        }
+
+        #prelude-sequence.active {
+            display: block;
+        }
+
+        .prelude-stage {
+            position: absolute;
+            inset: 0;
+            display: none;
+        }
+
+        .prelude-stage.active {
+            display: flex;
+        }
+
+        #prelude-loading {
+            background-image: radial-gradient(circle at center, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.88)), var(--loading-image);
+            background-size: cover;
+            background-position: center;
+        }
+
+        #prelude-loading-box {
+            position: absolute;
+            right: 26px;
+            bottom: 22px;
+            width: 380px;
+            border: 5px solid #fff;
+            background: rgba(17, 17, 17, 0.95);
+            box-shadow: 8px 8px 0 #111;
+            padding: 12px;
+            color: #fff;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 19px;
+        }
+
+        #prelude-loading-label {
+            font-size: 19px;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        #prelude-loading-track {
+            height: 18px;
+            border: 3px solid #fff;
+            background: #222;
+            overflow: hidden;
+        }
+
+        #prelude-loading-fill {
+            width: 0;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, #fff 0, #fff 10px, #d0d0d0 10px, #d0d0d0 20px);
+            transition: width 1.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        #prelude-loading-click-hint {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--meme-yellow);
+            letter-spacing: 1px;
+            display: none;
+            animation: blinkText 0.8s steps(1) infinite;
+        }
+
+        #intro-loading-click-hint {
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--meme-yellow);
+            letter-spacing: 1px;
+            display: none;
+            animation: blinkText 0.8s steps(1) infinite;
+        }
+
+        @keyframes blinkText {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        #prelude-video-stage {
+            background: #000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #prelude-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #000;
+        }
+
+        #prelude-progress-wrap {
+            position: absolute;
+            left: 50%;
+            bottom: 26px;
+            transform: translateX(-50%);
+            width: min(980px, calc(100% - 120px));
+            z-index: 4;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #prelude-progress-label {
+            align-self: flex-start;
+            padding: 6px 12px;
+            border: 3px solid #fff;
+            background: rgba(17, 17, 17, 0.86);
+            color: #fff;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        #prelude-progress-track {
+            width: 100%;
+            height: 28px;
+            border: 4px solid #fff;
+            background: rgba(17, 17, 17, 0.82);
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.9);
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        #prelude-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: repeating-linear-gradient(45deg, var(--meme-yellow) 0, var(--meme-yellow) 12px, #fff 12px, #fff 24px);
+        }
+
+        #prelude-progress-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            width: 22px;
+            height: 38px;
+            transform: translate(-50%, -50%);
+            background: var(--meme-pink);
+            border: 4px solid #111111;
+            box-shadow: 4px 4px 0 #111111;
+            pointer-events: none;
+        }
+
+        #prelude-thought-stage {
+            background: #000;
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 24px;
+            cursor: pointer;
+            text-align: center;
+            padding: 40px;
+        }
+
+        #prelude-thought-text {
+            max-width: 960px;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 56px;
+            line-height: 1.35;
+            letter-spacing: 2px;
+            text-shadow: 6px 6px 0 rgba(255, 0, 85, 0.35);
+        }
+
+        #prelude-thought-hint {
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 26px;
+            padding: 8px 16px;
+            border: 3px solid #fff;
+            background: rgba(17, 17, 17, 0.85);
+            animation: pulseHint 0.9s infinite;
+        }
+
+        #prelude-choice-stage {
+            background: rgba(0, 0, 0, 0.88);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 22px;
+            z-index: 2;
+        }
+
+        .prelude-choice-btn {
+            width: 760px;
+            padding: 18px 26px;
+            text-align: left;
+            border: 6px solid #111;
+            background: var(--meme-yellow);
+            color: #111;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 38px;
+            box-shadow: 10px 10px 0 #111;
+            transition: transform 0.15s ease;
+        }
+
+        .prelude-choice-btn:hover {
+            transform: translate(-4px, -4px) rotate(-1deg);
+            box-shadow: 14px 14px 0 #111;
+        }
+
+
+
+        #dialog-text {
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            letter-spacing: 0.6px;
+            text-shadow: 1px 1px 0 rgba(17, 17, 17, 0.12);
+        }
+
+        .version-badge {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            z-index: 60;
+            background: var(--meme-dark);
+            color: var(--meme-green);
+            border: 4px solid var(--meme-yellow);
+            padding: 8px 14px;
+            font-family: 'DotGothic16', 'Noto Sans TC', sans-serif;
+            font-size: 18px;
+            letter-spacing: 1px;
+            transform: skewX(-10deg);
+            box-shadow: 6px 6px 0 rgba(17, 17, 17, 0.9);
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.65);
+        }
+
+        .menu-main-btn {
+            font-size: 2.25rem;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            line-height: 1;
+        }
+
+        .menu-btn-disabled {
+            background-color: #3d3d3d !important;
+            color: #d0d0d0 !important;
+            opacity: 0.8;
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.8) !important;
+        }
+
+        .menu-btn-disabled:hover {
+            transform: none !important;
+            box-shadow: 8px 8px 0 rgba(17, 17, 17, 0.8) !important;
+            background-color: #3d3d3d !important;
+            color: #d0d0d0 !important;
+        }
+
+        /* ========== 增強字卡樣式 (Type A/B/C/D) ========== */
+        #toast-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 110;
+            overflow: hidden;
+        }
+
+        .brutal-card {
+            position: absolute;
+            z-index: 50;
+            border: 4px solid var(--meme-dark);
+            box-shadow: 8px 8px 0px var(--meme-dark);
+            background: white;
+        }
+
+        /* 類型 A：成就貼紙 */
+        .type-a-meme {
+            bottom: 30px;
+            right: 30px;
+            background: var(--meme-yellow);
+            transform: rotate(-3deg);
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            animation: stampIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards;
+            pointer-events: auto;
+        }
+        .type-a-meme.slide-out { animation: fallOff 0.4s ease-in forwards; }
+
+        /* 類型 B：進度條 */
+        .type-b-meme {
+            top: 30px;
+            left: 30px;
+            background: white;
+            padding: 15px;
+            width: min(360px, calc(100% - 60px));
+            max-width: calc(100% - 60px);
+            box-sizing: border-box;
+            transform: skew(-5deg);
+            animation: slideCrash 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            pointer-events: auto;
+        }
+        .type-b-meme .type-b-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 10px;
+        }
+        .type-b-meme .type-b-title {
+            font-family: 'Impact', 'Black Han Sans', sans-serif;
+            font-size: 1.45rem;
+            line-height: 1;
+            min-width: 0;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .type-b-meme .type-b-percent {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.85rem;
+            line-height: 1;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+        .type-b-meme .bar-container {
+            border: 3px solid var(--meme-dark);
+            height: 24px;
+            margin-top: 10px;
+            background: #eee;
+            overflow: hidden;
+        }
+        .type-b-meme .bar-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-right: 3px solid var(--meme-dark);
+        }
+
+        /* 類型 C：全螢幕警告 */
+        .type-c-meme {
+            inset: 0;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(17, 17, 17, 0.9);
+            animation: flashBang 0.2s ease-out forwards;
+            pointer-events: auto;
+        }
+
+        .speedlines {
+            position: absolute;
+            inset: -50%;
+            animation: rotateSpin 20s linear infinite;
+            z-index: -1;
+        }
+
+        .type-c-meme.warning .speedlines {
+            animation: rotateSpin 10s linear infinite, crazyShake 0.1s infinite;
+        }
+
+        .huge-text {
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 4rem;
+            color: white;
+            text-shadow: 6px 6px 0px var(--meme-pink), -3px -3px 0px var(--meme-cyan);
+            transform: rotate(-2deg);
+            line-height: 1.1;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .sub-badge {
+            background: var(--meme-yellow);
+            color: var(--meme-dark);
+            padding: 5px 15px;
+            font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.5rem;
+            border: 3px solid var(--meme-dark);
+            transform: rotate(2deg) translateY(-20px);
+            box-shadow: 5px 5px 0px var(--meme-dark);
+            z-index: 2;
+        }
+
+        /* 類型 D：角色狀態 */
+        .type-d-meme {
+            bottom: 30px;
+            left: 30px;
+            background: white;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: skew(-10deg);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            pointer-events: auto;
+        }
+        .type-d-meme .avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--meme-pink);
+            border: 3px solid var(--meme-dark);
+            transform: skew(10deg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes stampIn {
+            0% { transform: scale(3) rotate(15deg); opacity: 0; }
+            50% { transform: scale(0.9) rotate(-5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-3deg); opacity: 1; }
+        }
+        @keyframes fallOff {
+            0% { transform: translateY(0) rotate(-3deg); opacity: 1; }
+            100% { transform: translateY(200px) rotate(20deg); opacity: 0; }
+        }
+        @keyframes slideCrash {
+            0% { transform: translateX(-150%) skew(-5deg); }
+            80% { transform: translateX(10px) skew(-5deg); }
+            100% { transform: translateX(0) skew(-5deg); }
+        }
+        @keyframes flashBang {
+            0% { background: white; }
+            100% { background: rgba(17, 17, 17, 0.9); }
+        }
+        @keyframes rotateSpin {
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes popIn {
+            0% { transform: scale(0) skew(-10deg); }
+            100% { transform: scale(1) skew(-10deg); }
+        }
+
+        #theory-screen,
+        #review-screen {
+            position: absolute;
+            inset: 0;
+            z-index: 3000;
+            display: none;
+            background:
+                radial-gradient(circle at 8% 12%, rgba(255, 222, 0, 0.22), rgba(0, 0, 0, 0.05) 30%),
+                radial-gradient(circle at 90% 86%, rgba(0, 229, 255, 0.2), rgba(0, 0, 0, 0.08) 35%),
+                linear-gradient(140deg, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0.9));
+            overflow: auto;
+            padding: 72px 26px 52px;
+            box-sizing: border-box;
+        }
+
+        #theory-screen.active,
+        #review-screen.active {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .post-panel {
+            width: min(1180px, 96%);
+            border: 6px solid #111;
+            background: linear-gradient(180deg, #f7f7f7 0%, #ececec 100%);
+            box-shadow: 16px 16px 0 #111, inset 0 0 0 2px #fff;
+            padding: 30px;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .post-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.02) 0, rgba(0, 0, 0, 0.02) 2px, transparent 2px, transparent 6px);
+        }
+
+        .post-title {
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            margin-bottom: 18px;
+            color: #111;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0 #fff;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin: 18px 0 24px;
+        }
+
+        .theory-page {
+            display: none;
+        }
+
+        .theory-page.active {
+            display: block;
+        }
+
+        .theory-paragraph {
+            font-size: 24px;
+            line-height: 1.6;
+            font-weight: 700;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.78);
+            border: 3px solid #111;
+            box-shadow: 5px 5px 0 #111;
+            padding: 10px 12px;
+        }
+
+        .theory-list {
+            border: 4px solid #111;
+            background: #fffef6;
+            box-shadow: 6px 6px 0 #111;
+            padding: 14px 16px;
+            margin-top: 12px;
+        }
+
+        .theory-list p {
+            font-size: 22px;
+            line-height: 1.55;
+            margin: 8px 0;
+            font-weight: 700;
+        }
+
+        .theory-list b,
+        .theory-paragraph b {
+            color: #0d5f8f;
+            font-weight: 900;
+            letter-spacing: 0.2px;
+            padding: 0 2px;
+            background: linear-gradient(180deg, transparent 58%, rgba(77, 208, 225, 0.28) 58%);
+        }
+
+        .theory-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .theory-page-indicator {
+            border: 3px solid #111;
+            background: #fffde8;
+            box-shadow: 4px 4px 0 #111;
+            padding: 6px 14px;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 22px;
+        }
+
+        .theory-card {
+            border: 4px solid #111;
+            background: #fff;
+            padding: 12px;
+            box-shadow: 5px 5px 0 #111;
+        }
+
+        .theory-step {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 3px solid #111;
+            background: var(--meme-yellow);
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            margin-bottom: 8px;
+            box-shadow: 4px 4px 0 #111;
+            font-size: 34px;
+            line-height: 1.2;
+        }
+
+        .post-btn {
+            border: 4px solid #111;
+            background: var(--meme-cyan);
+            box-shadow: 6px 6px 0 #111;
+            padding: 10px 20px;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 24px;
+            cursor: pointer;
+            transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+        }
+
+        .post-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0 #111;
+            filter: brightness(1.02);
+        }
+
+        .post-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0 #111;
+        }
+
+        .post-btn.alt {
+            background: var(--meme-yellow);
+        }
+
+        .review-row {
+            border: 4px solid #111;
+            background: #fffef6;
+            box-shadow: 6px 6px 0 #111;
+            padding: 16px;
+            margin-top: 14px;
+        }
+
+        .review-hud {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .stat-chip {
+            border: 3px solid #111;
+            background: #fff;
+            box-shadow: 4px 4px 0 #111;
+            padding: 8px 10px;
+        }
+
+        .stat-chip .label {
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 16px;
+            color: #333;
+        }
+
+        .stat-chip .value {
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 28px;
+            color: #111;
+            line-height: 1.1;
+        }
+
+        .review-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .review-controls select {
+            border: 3px solid #111;
+            background: #fff;
+            box-shadow: 3px 3px 0 #111;
+            padding: 8px 10px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .sentiment-badge {
+            display: inline-block;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 16px;
+            border: 2px solid #111;
+            box-shadow: 2px 2px 0 #111;
+            padding: 2px 8px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .sentiment-badge.good {
+            background: #00d96f;
+            color: #042c18;
+        }
+
+        .sentiment-badge.normal {
+            background: #ffd84d;
+            color: #3f2d00;
+        }
+
+        .sentiment-badge.bad {
+            background: #ff6b6b;
+            color: #3d0909;
+        }
+
+        #review-score-value {
+            display: inline-block;
+            min-width: 90px;
+            text-align: center;
+            border: 3px solid #111;
+            background: var(--meme-pink);
+            color: #fff;
+            font-family: 'Black Han Sans', 'Noto Sans TC', sans-serif;
+            font-size: 34px;
+            padding: 6px 10px;
+            box-shadow: 4px 4px 0 #111;
+        }
+
+        #review-list {
+            max-height: 300px;
+            overflow: auto;
+            border: 3px solid #111;
+            background: #fefefe;
+            padding: 10px;
+            margin-top: 10px;
+            box-shadow: inset 0 0 0 2px #fff;
+        }
+
+        .review-item {
+            border: 3px solid #111;
+            background: #fff;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            box-shadow: 3px 3px 0 #111;
+            font-size: 22px;
+            line-height: 1.45;
+        }
+
+        .review-item-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 18px;
+            font-weight: 900;
+        }
+
+        .review-time {
+            font-size: 14px;
+            color: #444;
+            font-weight: 700;
+        }
+
+        .kw-bandura { color: #0a7d8c; font-weight: 900; }
+        .kw-model { color: #b45309; font-weight: 900; }
+        .kw-stage { color: #5b2ea6; font-weight: 900; }
+        .kw-meme { color: #c2185b; font-weight: 900; }
+
+        .score-input-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        #review-score-input {
+            width: 120px;
+            border: 3px solid #111;
+            background: #fff;
+            box-shadow: 3px 3px 0 #111;
+            padding: 6px 8px;
+            font-size: 22px;
+            font-weight: 900;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .post-title {
+                font-size: 36px;
+            }
+            .theory-paragraph,
+            .theory-list p {
+                font-size: 18px;
+            }
+            .theory-step {
+                font-size: 24px;
+            }
+            .review-item {
+                font-size: 17px;
+            }
+            .post-panel {
+                margin-top: 14px;
+                padding: 18px;
+            }
+            .review-hud {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="custom-cursor"></div>
+
+    <div id="game-container">
+        <!-- 漫畫網點背景層 -->
+        <div class="absolute inset-0 halftone-bg z-[1] opacity-20 mix-blend-multiply pointer-events-none"></div>
+        <!-- 濾鏡層 -->
+        <div id="screen-filter"></div>
+        <!-- CRT 覆蓋層 -->
+        <div class="crt-overlay"></div>
+
+        <!-- 字卡容器 -->
+        <div id="toast-container"></div>
+
+        <!-- ================= START SCREEN ================= -->
+        <div id="start-screen" class="absolute inset-0 flex flex-col items-center justify-center z-50">
+            <div class="bg-[var(--meme-yellow)] brutal-border brutal-shadow p-10 mb-16 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
+                <h1 class="pixel-sharp text-[80px] text-[var(--meme-dark)] leading-[0.9] text-center">
+                    是誰在中原留下的<br>
+                    <span class="pixel-sharp text-[60px] text-[var(--meme-pink)] bg-[var(--meme-dark)] px-4 inline-block mt-2 transform skew-x-12">醬板鴨</span>
+                </h1>
+            </div>
+            
+            <div class="flex flex-col gap-6 w-[400px]">
+                <button onclick="startGame()" class="menu-main-btn brutal-btn bg-[var(--meme-cyan)] text-[var(--meme-dark)] pixel-font brutal-border brutal-shadow text-center tracking-wider">
+                    [ START GAME ]
+                </button>
+                <button id="load-button" onclick="loadGame()" class="menu-main-btn brutal-btn bg-[var(--meme-yellow)] text-[var(--meme-dark)] pixel-font brutal-border brutal-shadow text-center tracking-wider">
+                    <span id="load-button-label">[ LOAD GAME ]</span>
+                </button>
+                <button onclick="exitGame()" class="menu-main-btn brutal-btn bg-[var(--meme-pink)] text-[var(--meme-white)] pixel-font brutal-border brutal-shadow text-center tracking-wider">
+                    [ EXIT ]
+                </button>
+            </div>
+
+            <div class="version-badge">V0.67-醬板鴨特仕版</div>
+        </div>
+
+        <!-- ================= GAME SCREEN ================= -->
+        <div id="game-screen" class="absolute inset-0 hidden z-10">
+            <div id="game-placeholder-bg"></div>
+
+            <div id="intro-sequence">
+                <div id="cg-frame">
+                    <div id="cg1-panel" class="cg-panel">
+                        <div id="cg1-phone-focus">
+                            <div id="cg1-phone-screen">
+                                點擊螢幕
+                                <div id="cg1-notification">手機通知<br>黃同學：星冰樂買一送一！</div>
+                            </div>
+                        </div>
+                        <div id="cg1-click-hint">點擊手機螢幕</div>
+                    </div>
+                    <div id="cg2-panel" class="cg-panel"></div>
+                    <div id="cg3-panel" class="cg-panel">
+                        <div id="cg3-left-sprite">
+                            <img src="./image/卓同學_思考.png" alt="卓同學 B">
+                            <span>卓同學 B</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="phone-chat-stage">
+                    <div id="phone-chat-shell">
+                        <div id="phone-chat-header">聊天室（黑白訊息）</div>
+                        <div id="phone-chat-body">
+                            <div id="chat-bubble-huang" class="chat-bubble from-huang">黃同學：欸欸欸，今天星冰樂買一送一！你要來嗎？</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cg3-thought-stage">
+                    <div id="cg3-thought-bubble">OS：黃同學她……算了。<br>我記得好像是……邀約...我嗎？<br>要去嗎？……還是去一下看看好了<br>……反正也沒差。</div>
+                </div>
+
+                <div id="chat-continue-hint">點擊繼續</div>
+
+                <div id="intro-loading-screen">
+                    <div id="intro-loading-box">
+                        LOADING...
+                        <div id="intro-loading-track">
+                            <div id="intro-loading-fill"></div>
+                        </div>
+                        <div id="intro-loading-click-hint">▶ 點擊繼續</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 角色立繪 -->
+            <div id="sprite-A" class="sprite">
+                <div class="sprite-placeholder is-art"><img class="sprite-art" src="./image/黃同學_立繪.png" data-default-src="./image/黃同學_立繪.png" alt="黃同學 A"></div>
+            </div>
+            <div id="sprite-B" class="sprite">
+                <div class="sprite-placeholder is-art"><img class="sprite-art" src="./image/卓同學_立繪.png" data-default-src="./image/卓同學_立繪.png" alt="卓同學 B"></div>
+            </div>
+            <div id="sprite-C" class="sprite">
+                    <div class="sprite-placeholder is-art"><img class="sprite-art" src="./image/林同學_立繪.png" data-default-src="./image/林同學_立繪.png" alt="林同學 C"></div>
+            </div>
+
+            <div id="character-intro-sequence">
+                <!-- 介紹橋段開場字卡 (理論介入風格) -->
+                <div id="character-intro-start-card" class="hidden">
+                    <div class="character-intro-start-wrapper">
+                        <div class="character-intro-start-badge">CHARACTER INTRO</div>
+                        <div class="character-intro-start-text">即將趕到<br>現場的是...<br>角色介紹</div>
+                    </div>
+                </div>
+
+                <!-- MP4 播放器容器 -->
+                <div id="character-intro-video-container" class="hidden">
+                    <div id="character-intro-video-stage-badge">
+                        <div id="character-intro-stage-key">A</div>
+                        <div id="character-intro-stage-name">黃同學 A</div>
+                        <div id="character-intro-stage-sub">NOW PLAYING</div>
+                    </div>
+                    <video id="character-intro-video" preload="metadata"></video>
+                    <div id="character-intro-progress-wrap" class="mp4-progress-wrap">
+                        <div id="character-intro-progress-label" class="mp4-progress-label">播放進度</div>
+                        <div id="character-intro-progress-track" class="mp4-progress-track">
+                            <div id="character-intro-progress-fill" class="mp4-progress-fill"></div>
+                            <div id="character-intro-progress-thumb" class="mp4-progress-thumb"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右上角播放器控制條 -->
+                    <div id="character-intro-controls">
+                        <button id="character-intro-play-btn" title="暫停" class="control-btn">
+                            <i class="ph-bold ph-pause"></i>
+                        </button>
+                        <button id="character-intro-skip-btn" title="跳過" class="control-btn">
+                            <i class="ph-bold ph-skip-forward"></i>
+                        </button>
+                        <button id="character-intro-fastforward-btn" title="快進" class="control-btn">
+                            <i class="ph-bold ph-fast-forward"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="prelude-sequence">
+                <div id="prelude-loading" class="prelude-stage">
+                    <div id="prelude-loading-box">
+                        <div id="prelude-loading-label">LOADING(BG1)</div>
+                        <div id="prelude-loading-track">
+                            <div id="prelude-loading-fill"></div>
+                        </div>
+                        <div id="prelude-loading-click-hint">▶ 點擊繼續</div>
+                    </div>
+                </div>
+
+                <div id="prelude-video-stage" class="prelude-stage">
+                    <video id="prelude-video" preload="metadata"></video>
+                    <div id="prelude-progress-wrap">
+                        <div id="prelude-progress-label">播放進度</div>
+                        <div id="prelude-progress-track">
+                            <div id="prelude-progress-fill"></div>
+                            <div id="prelude-progress-thumb"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="prelude-thought-stage" class="prelude-stage">
+                    <div id="prelude-thought-text">那是黃同學，等等為什麼林同學也在這裡？還是我去路易莎就不打擾他了</div>
+                    <div id="prelude-thought-hint">點擊黑色背景繼續</div>
+                </div>
+
+                <div id="prelude-choice-stage" class="prelude-stage">
+                    <button class="prelude-choice-btn" data-choice="starbucks">▶ 去星巴克</button>
+                    <button class="prelude-choice-btn" data-choice="louisa">▶ 去路易莎</button>
+                    <button class="prelude-choice-btn" data-choice="wood">▶ 原地不動當木頭</button>
+                </div>
+            </div>
+
+            <!-- 右上角：系統卡片堆疊區 -->
+            <div id="system-container" class="absolute top-8 right-8 z-50 flex flex-col gap-4 pointer-events-none">
+                <!-- 卡片由 JS 生成 -->
+            </div>
+
+            <!-- 中央：選項按鈕區 -->
+            <div id="choice-container" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-[160] hidden flex-col items-center justify-center gap-8">
+                <!-- 選項由 JS 生成 -->
+            </div>
+
+            <!-- 底部：對話框區塊 -->
+            <div id="dialog-area" class="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-[92%] z-30 cursor-pointer" onclick="advanceDialog()">
+                
+                <!-- 姓名牌 -->
+                <div id="name-tag-container" class="absolute -top-10 left-8 z-10 hidden">
+                    <div id="name-tag" class="bg-[var(--meme-pink)] text-[var(--meme-white)] impact-font text-4xl px-8 py-2 brutal-border brutal-shadow-sm">
+                        角色名稱
+                    </div>
+                </div>
+
+                <!-- 對話框主體 -->
+                <div id="dialog-box" class="w-full h-56 flex flex-col justify-between">
+                    <!-- 上方裝飾條 -->
+                    <div class="h-6 w-full bg-[var(--meme-yellow)] border-b-8 border-[var(--meme-dark)] flex items-center px-4 overflow-hidden">
+                        <div class="pixel-font text-xs tracking-widest text-[var(--meme-dark)] flex whitespace-nowrap">
+                            系統訊息 // 醬板鴨_OS // 等待輸入 // 
+                        </div>
+                    </div>
+                    
+                    <!-- 內文區 -->
+                    <div class="p-8 h-full relative overflow-hidden">
+                        <p id="dialog-text" class="text-4xl font-bold leading-[1.6] text-[var(--meme-dark)] break-words"></p>
+                    </div>
+
+                    <!-- 繼續提示游標 -->
+                    <div id="next-indicator" class="absolute bottom-6 right-8 hidden">
+                        <i class="ph-fill ph-caret-down text-5xl text-[var(--meme-pink)] animate-bounce"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= META OS (現實玩家字幕) ================= -->
+        <div id="meta-os" class="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 translate-y-24 z-[100] pointer-events-none hidden">
+            <div class="bg-[var(--meme-dark)] text-[var(--meme-white)] text-3xl font-bold px-8 py-4 brutal-border brutal-shadow-white transform rotate-2">
+                <span class="text-[var(--meme-yellow)] mr-2 pixel-font">PLAYER OS ></span>
+                <span id="meta-os-text" class="impact-font tracking-wide">...</span>
+            </div>
+        </div>
+
+        <!-- ================= END SCREEN ================= -->
+        <div id="end-screen" class="absolute inset-0 bg-[var(--meme-dark)] z-[900] hidden flex flex-col items-center justify-center halftone-bg filter grayscale">
+            <h1 class="impact-font text-[120px] text-white tracking-widest mb-12 drop-shadow-[0_0_20px_rgba(255,255,255,0.5)]">
+                GAME OVER
+            </h1>
+            
+            <div class="bg-[var(--meme-yellow)] text-[var(--meme-dark)] brutal-border brutal-shadow p-12 max-w-4xl text-center transform -skew-x-3">
+                <h2 class="text-4xl font-bold mb-6 impact-font bg-black text-white px-4 py-2 inline-block">
+                    觀察學習 Step 4：再現（Reproduction）
+                </h2>
+                <p class="text-5xl font-bold leading-tight">
+                    「行為傳染，無遠弗屆。」
+                </p>
+                <p class="text-right mt-6 text-2xl font-bold text-gray-700">—— Albert Bandura</p>
+                <button id="end-to-theory-btn" class="post-btn mt-8">進入理論解析</button>
+            </div>
+        </div>
+
+        <div id="theory-screen">
+            <div class="post-panel">
+                <div class="post-title">理論使用介紹</div>
+                <div class="theory-page active" data-page="1">
+                    <div class="theory-step">Page 1 / 4　波波娃娃效應（The Bobo Doll Effect）</div>
+                    <p class="theory-paragraph"><b>【迷因的初始感染源】</b> 本次事件還原：</p>
+                    <div class="theory-list">
+                        <p><b>初始情境：</b>面對卓同學強烈的怒火，黃同學選擇滑手機看<span class="kw-meme">迷因影片</span>逃避現實壓力。</p>
+                        <p><b>第一層傳染：</b>此舉引來林同學好奇，讓手機影片角色成為初始示範者（<span class="kw-model">Model</span>）。</p>
+                    </div>
+                    <p class="theory-paragraph"><b>學術理論對應：</b></p>
+                    <div class="theory-list">
+                        <p><b>螢幕影像楷模：</b><span class="kw-bandura">Bandura</span> 證實影片與卡通角色同樣具有強烈示範效果。</p>
+                        <p><b>負增強動機：</b>藉由模仿或觀看荒謬行為，達到「逃避當下壓力」的負增強效果。</p>
+                    </div>
+                </div>
+
+                <div class="theory-page" data-page="2">
+                    <div class="theory-step">Page 2 / 4　觀察學習四階段（4 Stages of Learning）</div>
+                    <p class="theory-paragraph">【林同學的大腦感染歷程】</p>
+                    <div class="theory-list">
+                        <p><b><span class="kw-stage">Step 1 注意 (Attention)</span>：</b>視線從抱怨的卓同學，轉移至黃同學的手機螢幕。</p>
+                        <p><b><span class="kw-stage">Step 2 保留 (Retention)</span>：</b>影片荒謬節奏與動作，在大腦中迅速完成記憶編碼。</p>
+                        <p><b><span class="kw-stage">Step 3 動機 (Motivation)</span>：</b>為徹底無視卓同學怒火，產生將行為具現化的強烈動機。</p>
+                        <p><b><span class="kw-stage">Step 4 再現 (Reproduction)</span>：</b>把迷因搬到現實，瘋狂大跳，完成虛擬到現實的複製。</p>
+                    </div>
+                </div>
+
+                <div class="theory-page" data-page="3">
+                    <div class="theory-step">Page 3 / 4　二次傳染與潛伏學習（Secondary Contagion）</div>
+                    <p class="theory-paragraph">【群體擴散與隱藏機制】</p>
+                    <div class="theory-list">
+                        <p><b>1. 卓同學＝潛伏學習（Latent Learning）</b>：當下沒跳不代表沒學會；大腦可能已完成編碼，隨時被誘因觸發。</p>
+                        <p><b>2. 黃同學＝媒介階層效果（Media Hierarchy）</b>：原本只看卡通效果弱，但真人同儕（林同學）加入後，出現更強去抑制效應。</p>
+                    </div>
+                </div>
+
+                <div class="theory-page" data-page="4">
+                    <div class="theory-step">Page 4 / 4　總結（Lesson Learned）</div>
+                    <p class="theory-paragraph"><b>【觀測報告終端結論】</b></p>
+                    <div class="theory-list">
+                        <p><b>迷因即病毒：</b>社會學習論每天都在上演，我們在不知不覺中扮演示範者與觀察者。</p>
+                        <p><b>保持清醒：</b>唯有意識到行為如何被傳染，才能在荒謬情境中保有不發瘋的清醒。</p>
+                    </div>
+                    <button id="theory-to-review-btn" class="post-btn">前往玩家評分</button>
+                </div>
+
+                <div class="theory-nav">
+                    <button id="theory-prev-btn" class="post-btn alt">上一頁</button>
+                    <div id="theory-page-indicator" class="theory-page-indicator">1 / 4</div>
+                    <button id="theory-next-btn" class="post-btn">下一頁</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="review-screen">
+            <div class="post-panel">
+                <div class="post-title">玩家評分與留言</div>
+                <div class="review-row">
+                    <div class="review-hud">
+                        <div class="stat-chip"><div class="label">總評分數</div><div id="review-total-count" class="value">2</div></div>
+                        <div class="stat-chip"><div class="label">平均分數</div><div id="review-avg-score" class="value">80</div></div>
+                        <div class="stat-chip"><div class="label">好評</div><div id="review-good-count" class="value">1</div></div>
+                        <div class="stat-chip"><div class="label">普通 / 負評</div><div id="review-midbad-count" class="value">1 / 0</div></div>
+                    </div>
+                </div>
+                <div class="review-row">
+                    <div class="text-2xl font-bold mb-2">你的分數 (0~100)</div>
+                    <input id="review-score" type="range" min="0" max="100" value="67" style="width:min(680px,100%);accent-color:#00bcd4;">
+                    <div class="score-input-group">
+                        <span id="review-score-value">67</span>
+                        <label for="review-score-input" class="text-xl font-bold">手動輸入：</label>
+                        <input id="review-score-input" type="number" min="0" max="100" step="1" value="67">
+                    </div>
+                </div>
+                <div class="review-row">
+                    <div class="text-2xl font-bold mb-2">留言</div>
+                    <textarea id="review-comment" rows="4" style="width:100%;border:3px solid #111;padding:10px;font-size:18px;" placeholder="例如：我最喜歡字卡節奏和理論融入方式。"></textarea>
+                    <div class="mt-4 flex gap-3">
+                        <button id="review-submit-btn" class="post-btn">送出評分</button>
+                        <button id="review-restart-btn" class="post-btn alt">重新開始遊戲</button>
+                    </div>
+                </div>
+                <div class="review-row">
+                    <div class="text-2xl font-bold">社群留言 <span id="review-badge" class="sentiment-badge normal">普通</span></div>
+                    <div class="review-controls mt-3">
+                        <label>排序：</label>
+                        <select id="review-sort">
+                            <option value="new">最新優先</option>
+                            <option value="high">分數高到低</option>
+                            <option value="low">分數低到高</option>
+                        </select>
+                        <label>篩選：</label>
+                        <select id="review-filter">
+                            <option value="all">全部分數</option>
+                            <option value="good">好評 (80~100)</option>
+                            <option value="normal">普通 (50~79)</option>
+                            <option value="bad">負評 (0~49)</option>
+                        </select>
+                    </div>
+                    <div id="review-list"></div>
+                    <div id="review-empty" class="text-xl font-bold mt-3 hidden">目前沒有符合篩選條件的留言。</div>
+                    <div id="review-seed-data" class="hidden" data-items='[{"score":88,"comment":"理論轉成互動橋段很有感。","time":1780150000000},{"score":72,"comment":"劇情很鬧，但觀察學習概念有記住。","time":1780150500000}]'>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= 遊戲腳本引擎 ================= -->
+    <script>
+        // 游標跟隨
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        document.addEventListener('mousedown', () => cursor.classList.add('clicking'));
+        document.addEventListener('mouseup', () => cursor.classList.remove('clicking'));
+
+        // ================= 腳本設定 =================
+        const script = [
+            { speaker: '黃同學 A', color: 'var(--meme-pink)', text: '「妳來啦！我剛剛把買一送一跟林同學了，妳只能自己買喔！」', sA: 'focus', sB: 'active', sC: 'active' },
+            { speaker: '林同學 C', color: 'var(--meme-green)', text: '「（拿著星冰樂吸溜一口）嘶溜。」', sA: 'active', sB: 'active', sC: 'focus', cImage: './image/林同學_星冰樂', shake: 'sC' },
+            { speaker: '卓同學 B', color: 'var(--meme-cyan)', text: '「……好吧。」', sA: 'active', sB: 'focus', sC: 'active', cImage: './image/林同學_星冰樂' },
+            
+            { speaker: '黃同學 A', color: 'var(--meme-pink)', text: '「走，我帶你們去個涼一點的地方！」', sA: 'focus', sB: 'active', sC: 'active' },
+            { type: 'loading', label: 'LOADING(BG3)', bgPath: './image/bg3.jpg' },
+            { type: 'video', path: './image/蘭花園.mp4', duration: 22000 },
+
+            { speaker: '卓同學（心想）', color: 'var(--meme-cyan)', text: '她沒有請我還帶我去這裡，說好涼一點的地方呢？還要聽她說這個…', sA: 'active', sB: 'focus', sC: 'active', bgImage: './image/bg_蘭花園' },
+            
+            { speaker: '卓同學 B', color: 'var(--meme-cyan)', text: '「我們曾經的感情就像孟寶愛崴寶，崴寶愛孟寶。但我今天真的受夠了！」', sA: 'active', sB: 'focus', sC: 'active', filter: 'filter-alert', shake: 'sB', bgImage: './image/bg_莊敬' },
+            
+            { type: 'angry-choice' },
+            
+            // 感染擴散
+            { speaker: '林同學 C', color: 'var(--meme-green)', text: '「67~~67~~67~~67~~」', sA: 'active', sB: 'active', sC: 'crazy', filter: 'filter-glitch' },
+            { type: 'system', icon: 'ph-brain', title: '觀察學習 Step 2', text: '保留（Retention）– 行為已編碼。' },
+            { type: 'system', icon: 'ph-fire', title: '觀察學習 Step 3', text: '動機（Motivation）– 受到同儕壓力驅使。' },
+            
+            { speaker: '黃同學 A', color: 'var(--meme-pink)', text: '「這……這節奏……好洗腦……67！67！」', sA: 'crazy', sB: 'active', sC: 'crazy', filter: 'filter-glitch' },
+            { type: 'system', icon: 'ph-copy', title: '觀察學習 Step 4', text: '再現（Reproduction）– 模仿行為已執行。' },
+            
+            { speaker: '卓同學 B', color: 'var(--meme-cyan)', text: '「……這群人到底在幹嘛。」', sA: 'crazy', sB: 'focus', sC: 'crazy', filter: '' },
+            
+            // 結尾
+            { type: 'system', icon: 'ph-skull', title: '⚠️ 警告', text: '觀察學習潛伏期已達 99%……', isWarning: true },
+            { type: 'end' }
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        let typeInterval;
+        let fullText = "";
+        let charIndex = 0;
+        const SAVE_KEY = 'bandura67_save_v1';
+
+        const dialogTextEl = document.getElementById('dialog-text');
+        const nextIndicator = document.getElementById('next-indicator');
+        const nameTagContainer = document.getElementById('name-tag-container');
+        const nameTag = document.getElementById('name-tag');
+        const metaOs = document.getElementById('meta-os');
+        const choiceContainer = document.getElementById('choice-container');
+        const dialogArea = document.getElementById('dialog-area');
+        const gamePlaceholderBg = document.getElementById('game-placeholder-bg');
+        const loadButton = document.getElementById('load-button');
+        const loadButtonLabel = document.getElementById('load-button-label');
+        const introSequence = document.getElementById('intro-sequence');
+        const cgFrame = document.getElementById('cg-frame');
+        const cg1PhoneScreen = document.getElementById('cg1-phone-screen');
+        const cg1Notification = document.getElementById('cg1-notification');
+        const cg1ClickHint = document.getElementById('cg1-click-hint');
+        const phoneChatStage = document.getElementById('phone-chat-stage');
+        const cg3ThoughtStage = document.getElementById('cg3-thought-stage');
+        const chatBubbleHuang = document.getElementById('chat-bubble-huang');
+        const chatContinueHint = document.getElementById('chat-continue-hint');
+        const loadingScreen = document.getElementById('intro-loading-screen');
+        const loadingFill = document.getElementById('intro-loading-fill');
+        const characterIntroSequence = document.getElementById('character-intro-sequence');
+        const characterIntroStartCard = document.getElementById('character-intro-start-card');
+        const characterIntroVideoContainer = document.getElementById('character-intro-video-container');
+        const characterIntroVideo = document.getElementById('character-intro-video');
+        const characterIntroStageKey = document.getElementById('character-intro-stage-key');
+        const characterIntroStageName = document.getElementById('character-intro-stage-name');
+        const characterIntroProgressWrap = document.getElementById('character-intro-progress-wrap');
+        const characterIntroProgressTrack = document.getElementById('character-intro-progress-track');
+        const characterIntroProgressFill = document.getElementById('character-intro-progress-fill');
+        const characterIntroProgressThumb = document.getElementById('character-intro-progress-thumb');
+        const characterIntroPlayBtn = document.getElementById('character-intro-play-btn');
+        const characterIntroSkipBtn = document.getElementById('character-intro-skip-btn');
+        const characterIntroFastForwardBtn = document.getElementById('character-intro-fastforward-btn');
+        const endScreen = document.getElementById('end-screen');
+        const theoryScreen = document.getElementById('theory-screen');
+        const reviewScreen = document.getElementById('review-screen');
+        const endToTheoryBtn = document.getElementById('end-to-theory-btn');
+        const theoryPrevBtn = document.getElementById('theory-prev-btn');
+        const theoryNextBtn = document.getElementById('theory-next-btn');
+        const theoryPageIndicator = document.getElementById('theory-page-indicator');
+        const theoryPages = Array.from(document.querySelectorAll('#theory-screen .theory-page'));
+        const theoryToReviewBtn = document.getElementById('theory-to-review-btn');
+        const reviewScore = document.getElementById('review-score');
+        const reviewScoreValue = document.getElementById('review-score-value');
+        const reviewScoreInput = document.getElementById('review-score-input');
+        const reviewComment = document.getElementById('review-comment');
+        const reviewSubmitBtn = document.getElementById('review-submit-btn');
+        const reviewRestartBtn = document.getElementById('review-restart-btn');
+        const reviewList = document.getElementById('review-list');
+        const reviewSort = document.getElementById('review-sort');
+        const reviewFilter = document.getElementById('review-filter');
+        const reviewTotalCount = document.getElementById('review-total-count');
+        const reviewAvgScore = document.getElementById('review-avg-score');
+        const reviewGoodCount = document.getElementById('review-good-count');
+        const reviewMidBadCount = document.getElementById('review-midbad-count');
+        const reviewBadge = document.getElementById('review-badge');
+        const reviewEmpty = document.getElementById('review-empty');
+        const reviewSeedData = document.getElementById('review-seed-data');
+        const preludeSequence = document.getElementById('prelude-sequence');
+        const preludeLoadingStage = document.getElementById('prelude-loading');
+        const preludeLoadingLabel = document.getElementById('prelude-loading-label');
+        const preludeLoadingFill = document.getElementById('prelude-loading-fill');
+        const preludeVideoStage = document.getElementById('prelude-video-stage');
+        const preludeVideo = document.getElementById('prelude-video');
+        const preludeProgressWrap = document.getElementById('prelude-progress-wrap');
+        const preludeProgressTrack = document.getElementById('prelude-progress-track');
+        const preludeProgressFill = document.getElementById('prelude-progress-fill');
+        const preludeProgressThumb = document.getElementById('prelude-progress-thumb');
+        const preludeThoughtStage = document.getElementById('prelude-thought-stage');
+        const preludeChoiceStage = document.getElementById('prelude-choice-stage');
+        const spriteImageEls = {
+            'sprite-A': document.querySelector('#sprite-A .sprite-art'),
+            'sprite-B': document.querySelector('#sprite-B .sprite-art'),
+            'sprite-C': document.querySelector('#sprite-C .sprite-art')
+        };
+
+        let currentSceneBg = './image/bg_星巴克.jpg';
+        let theoryPageIndex = 0;
+        let reviewEntries = [];
+
+        function reviewTier(score) {
+            if (score >= 80) return 'good';
+            if (score >= 50) return 'normal';
+            return 'bad';
+        }
+
+        function tierLabel(tier) {
+            if (tier === 'good') return '好評';
+            if (tier === 'normal') return '普通';
+            return '負評';
+        }
+
+        function formatTime(ts) {
+            const d = new Date(ts);
+            const yy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const mi = String(d.getMinutes()).padStart(2, '0');
+            return `${yy}/${mm}/${dd} ${hh}:${mi}`;
+        }
+
+        function renderReviewList() {
+            if (!reviewList) return;
+            const sortMode = reviewSort ? reviewSort.value : 'new';
+            const filterMode = reviewFilter ? reviewFilter.value : 'all';
+
+            let items = [...reviewEntries];
+            if (filterMode !== 'all') {
+                items = items.filter((it) => reviewTier(it.score) === filterMode);
+            }
+
+            if (sortMode === 'high') items.sort((a, b) => b.score - a.score || b.time - a.time);
+            else if (sortMode === 'low') items.sort((a, b) => a.score - b.score || b.time - a.time);
+            else items.sort((a, b) => b.time - a.time);
+
+            reviewList.innerHTML = '';
+            items.forEach((it) => {
+                const item = document.createElement('div');
+                item.className = 'review-item';
+                const tier = reviewTier(it.score);
+                item.innerHTML = `
+                    <div class="review-item-head">
+                        <div>
+                            <b>${it.score} 分</b>
+                            <span class="sentiment-badge ${tier}">${tierLabel(tier)}</span>
+                        </div>
+                        <div class="review-time">${formatTime(it.time)}</div>
+                    </div>
+                    <div>${String(it.comment).replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                `;
+                reviewList.appendChild(item);
+            });
+
+            if (reviewEmpty) reviewEmpty.classList.toggle('hidden', items.length > 0);
+        }
+
+        function updateReviewStats() {
+            if (!reviewEntries.length) return;
+            const total = reviewEntries.length;
+            const sum = reviewEntries.reduce((acc, it) => acc + it.score, 0);
+            const avg = Math.round(sum / total);
+            const good = reviewEntries.filter((it) => reviewTier(it.score) === 'good').length;
+            const normal = reviewEntries.filter((it) => reviewTier(it.score) === 'normal').length;
+            const bad = reviewEntries.filter((it) => reviewTier(it.score) === 'bad').length;
+
+            if (reviewTotalCount) reviewTotalCount.innerText = String(total);
+            if (reviewAvgScore) reviewAvgScore.innerText = String(avg);
+            if (reviewGoodCount) reviewGoodCount.innerText = String(good);
+            if (reviewMidBadCount) reviewMidBadCount.innerText = `${normal} / ${bad}`;
+
+            if (reviewBadge) {
+                const tier = avg >= 80 ? 'good' : (avg >= 50 ? 'normal' : 'bad');
+                reviewBadge.className = `sentiment-badge ${tier}`;
+                reviewBadge.innerText = tierLabel(tier);
+            }
+        }
+
+        function initReviewSeedData() {
+            if (!reviewSeedData) return;
+            try {
+                const parsed = JSON.parse(reviewSeedData.dataset.items || '[]');
+                reviewEntries = parsed.map((it) => ({
+                    score: Number(it.score) || 0,
+                    comment: String(it.comment || '（未填寫留言）'),
+                    time: Number(it.time) || Date.now()
+                }));
+            } catch {
+                reviewEntries = [];
+            }
+            updateReviewStats();
+            renderReviewList();
+        }
+
+        function setTheoryPage(index) {
+            if (!theoryPages.length) return;
+            const maxIndex = theoryPages.length - 1;
+            theoryPageIndex = Math.max(0, Math.min(index, maxIndex));
+            theoryPages.forEach((page, i) => {
+                page.classList.toggle('active', i === theoryPageIndex);
+            });
+            if (theoryPrevBtn) theoryPrevBtn.disabled = theoryPageIndex === 0;
+            if (theoryNextBtn) theoryNextBtn.style.display = theoryPageIndex === maxIndex ? 'none' : 'inline-block';
+            if (theoryPageIndicator) theoryPageIndicator.innerText = `${theoryPageIndex + 1} / ${theoryPages.length}`;
+        }
+
+        function showEndFlow() {
+            document.getElementById('game-screen').classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            endScreen.classList.add('flex');
+            theoryScreen.classList.remove('active');
+            reviewScreen.classList.remove('active');
+            localStorage.removeItem(SAVE_KEY);
+            updateLoadButtonState();
+        }
+
+        if (endToTheoryBtn) {
+            endToTheoryBtn.addEventListener('click', () => {
+                endScreen.classList.add('hidden');
+                endScreen.classList.remove('flex');
+                theoryScreen.classList.add('active');
+                setTheoryPage(0);
+            });
+        }
+
+        if (theoryPrevBtn) {
+            theoryPrevBtn.addEventListener('click', () => setTheoryPage(theoryPageIndex - 1));
+        }
+
+        if (theoryNextBtn) {
+            theoryNextBtn.addEventListener('click', () => setTheoryPage(theoryPageIndex + 1));
+        }
+
+        if (theoryToReviewBtn) {
+            theoryToReviewBtn.addEventListener('click', () => {
+                theoryScreen.classList.remove('active');
+                reviewScreen.classList.add('active');
+                updateReviewStats();
+                renderReviewList();
+            });
+        }
+
+        setTheoryPage(0);
+
+        const normalizeScore = (raw) => {
+            const n = Number(raw);
+            if (!Number.isFinite(n)) return 0;
+            return Math.max(0, Math.min(100, Math.round(n)));
+        };
+
+        const syncScoreUi = (raw) => {
+            const score = normalizeScore(raw);
+            if (reviewScore) reviewScore.value = String(score);
+            if (reviewScoreValue) reviewScoreValue.innerText = String(score);
+            if (reviewScoreInput) reviewScoreInput.value = String(score);
+            return score;
+        };
+
+        if (reviewScore) {
+            reviewScore.addEventListener('input', () => {
+                syncScoreUi(reviewScore.value);
+            });
+        }
+
+        if (reviewScoreInput) {
+            reviewScoreInput.addEventListener('input', () => {
+                syncScoreUi(reviewScoreInput.value);
+            });
+            reviewScoreInput.addEventListener('blur', () => {
+                syncScoreUi(reviewScoreInput.value);
+            });
+        }
+
+        if (reviewSubmitBtn) {
+            reviewSubmitBtn.addEventListener('click', () => {
+                const score = syncScoreUi(reviewScoreInput ? reviewScoreInput.value : (reviewScore ? reviewScore.value : 0));
+                const msg = (reviewComment && reviewComment.value.trim()) || '（未填寫留言）';
+                reviewEntries.push({ score, comment: msg, time: Date.now() });
+                updateReviewStats();
+                renderReviewList();
+                if (reviewComment) reviewComment.value = '';
+            });
+        }
+
+        syncScoreUi(67);
+
+        if (reviewSort) reviewSort.addEventListener('change', renderReviewList);
+        if (reviewFilter) reviewFilter.addEventListener('change', renderReviewList);
+
+        initReviewSeedData();
+
+        if (reviewRestartBtn) {
+            reviewRestartBtn.addEventListener('click', () => {
+                location.reload();
+            });
+        }
+
+        function applySceneBackground(bgPath) {
+            if (!gamePlaceholderBg || !bgPath) return;
+
+            const hasExplicitExtension = /\.[a-z0-9]+$/i.test(bgPath);
+            const candidates = hasExplicitExtension
+                ? [bgPath]
+                : [`${bgPath}.png`, `${bgPath}.jpg`, `${bgPath}.jpeg`, `${bgPath}.webp`];
+
+            // 最後保底用目前背景，避免因檔案不存在導致畫面空白
+            if (!candidates.includes(currentSceneBg)) candidates.push(currentSceneBg);
+
+            const tryCandidate = (index) => {
+                const nextSrc = candidates[index] || currentSceneBg;
+                const probe = new Image();
+                probe.onload = () => {
+                    currentSceneBg = nextSrc;
+                    gamePlaceholderBg.style.background = `#050505 url('${nextSrc}') center center / contain no-repeat`;
+                };
+                probe.onerror = () => {
+                    if (index + 1 < candidates.length) {
+                        tryCandidate(index + 1);
+                    }
+                };
+                probe.src = nextSrc;
+            };
+
+            tryCandidate(0);
+        }
+
+        let introMode = false;
+        let introResolve = null;
+        let cg2Triggered = false;
+        let introClickStage = 0;
+        let introPauseStage = 0;
+        let characterIntroMode = false;
+        let characterIntroIndex = 0;
+        let characterIntroResolve = null;
+        let characterIntroIsPlaying = false;
+        let openingFlowMode = false;
+        let characterIntroProgressRaf = 0;
+        let preludeProgressRaf = 0;
+
+        const characterIntroData = [
+            {
+                key: 'A',
+                name: '黃同學 A',
+                color: 'var(--meme-pink)',
+                video: './image/黃同學_角色介紹.mp4'
+            },
+            {
+                key: 'B',
+                name: '卓同學 B',
+                color: 'var(--meme-cyan)',
+                video: './image/卓同學_角色介紹.mp4'
+            },
+            {
+                key: 'C',
+                name: '林同學 C',
+                color: 'var(--meme-green)',
+                video: './image/林同學_角色介紹.mp4'
+            }
+        ];
+
+        function runIntroSequence() {
+            introMode = true;
+            cg2Triggered = false;
+            introClickStage = 0;
+            introPauseStage = 0;
+            dialogArea.classList.add('hidden');
+            nameTagContainer.classList.add('hidden');
+            metaOs.classList.add('hidden');
+            nextIndicator.classList.add('hidden');
+
+            cgFrame.classList.remove('to-cg2', 'to-cg3');
+            cg1Notification.classList.remove('show');
+            cg1PhoneScreen.firstChild.textContent = '點擊螢幕';
+            cg1ClickHint.classList.remove('hidden');
+            cg1ClickHint.innerText = '點擊手機螢幕';
+            phoneChatStage.classList.remove('active', 'out');
+            cg3ThoughtStage.classList.remove('active');
+            chatContinueHint.classList.remove('show');
+            loadingScreen.classList.remove('active');
+            loadingFill.style.width = '0%';
+            chatBubbleHuang.classList.remove('show');
+            chatContinueHint.innerText = '點擊繼續';
+
+            introSequence.classList.add('active');
+            introSequence.onclick = handleIntroClick;
+
+            return new Promise((resolve) => {
+                introResolve = resolve;
+            });
+        }
+
+        function handleIntroClick(event) {
+            if (!introMode) return;
+
+            const clickedPhone = event.target.closest('#cg1-phone-focus');
+            const clickedContinue = event.target.closest('#chat-continue-hint');
+
+            if (!cg2Triggered) {
+                if (clickedPhone) goToCG2();
+                return;
+            }
+
+            if (introPauseStage === 1 || introPauseStage === 2 || clickedContinue) {
+                continueIntroChat();
+            }
+        }
+
+        function goToCG2() {
+            if (!introMode) return;
+
+            if (introClickStage === 0) {
+                introClickStage = 1;
+                cg1Notification.classList.add('show');
+                cg1PhoneScreen.firstChild.textContent = '';
+                cg1ClickHint.innerText = '再次點擊開啟訊息';
+                return;
+            }
+
+            if (cg2Triggered) return;
+            cg2Triggered = true;
+            cgFrame.classList.add('to-cg2');
+            cg1ClickHint.classList.add('hidden');
+
+            setTimeout(() => {
+                phoneChatStage.classList.add('active');
+            }, 340);
+
+            setTimeout(() => {
+                chatBubbleHuang.classList.add('show');
+                introPauseStage = 1;
+                chatContinueHint.classList.add('show');
+                chatContinueHint.innerText = '點擊一下';
+            }, 680);
+        }
+
+        function continueIntroChat() {
+            if (!introMode || introPauseStage === 0) return;
+
+            if (introPauseStage === 1) {
+                introPauseStage = 2;
+                cgFrame.classList.add('to-cg3');
+                phoneChatStage.classList.add('out');
+                setTimeout(() => {
+                    phoneChatStage.classList.remove('active');
+                    cg3ThoughtStage.classList.add('active');
+                    chatContinueHint.innerText = '點擊一下';
+                }, 360);
+                return;
+            }
+
+            if (introPauseStage !== 2) return;
+            introPauseStage = 3;
+            chatContinueHint.classList.remove('show');
+
+            setTimeout(() => {
+                document.documentElement.style.setProperty('--intro-loading-image', "url('./image/bg2.jpg')");
+                loadingScreen.classList.add('active');
+                const introClickHint = document.getElementById('intro-loading-click-hint');
+                if (introClickHint) introClickHint.style.display = 'none';
+
+                if (introLoadingHintTimer) {
+                    clearTimeout(introLoadingHintTimer);
+                    introLoadingHintTimer = null;
+                }
+                if (introLoadingClickHandler) {
+                    loadingScreen.removeEventListener('click', introLoadingClickHandler);
+                    introLoadingClickHandler = null;
+                }
+
+                requestAnimationFrame(() => {
+                    loadingFill.style.width = '100%';
+                });
+                // 填滿後顯示「點擊繼續」，等待點擊才跳頁
+                introLoadingHintTimer = setTimeout(() => {
+                    if (introClickHint) introClickHint.style.display = 'block';
+                    introLoadingClickHandler = () => {
+                        loadingScreen.removeEventListener('click', introLoadingClickHandler);
+                        introLoadingClickHandler = null;
+                        if (introLoadingHintTimer) {
+                            clearTimeout(introLoadingHintTimer);
+                            introLoadingHintTimer = null;
+                        }
+                        loadingScreen.classList.remove('active');
+                        if (introClickHint) introClickHint.style.display = 'none';
+                        introSequence.classList.remove('active');
+                        introSequence.onclick = null;
+                        introMode = false;
+                        if (introResolve) introResolve();
+                    };
+                    loadingScreen.addEventListener('click', introLoadingClickHandler);
+                    const loadingBox = document.getElementById('intro-loading-box');
+                    if (loadingBox) {
+                        loadingBox.style.pointerEvents = 'none';
+                    }
+                    introLoadingHintTimer = null;
+                }, 1400);
+            }, 260);
+        }
+
+        function setOpeningHeroFocus() {
+            const spriteA = document.getElementById('sprite-A');
+            const spriteB = document.getElementById('sprite-B');
+            const spriteC = document.getElementById('sprite-C');
+
+            spriteA.className = 'sprite';
+            spriteC.className = 'sprite';
+            spriteB.className = 'sprite active focus';
+
+            nameTagContainer.classList.remove('hidden');
+            nameTag.innerText = '卓同學 B';
+            nameTag.style.backgroundColor = 'var(--meme-cyan)';
+            dialogTextEl.innerHTML = '......';
+            nextIndicator.classList.add('hidden');
+        }
+
+
+
+
+
+        function playCharacterIntroVideo() {
+            if (!characterIntroMode || characterIntroIndex >= characterIntroData.length) {
+                endCharacterIntroSequence();
+                return;
+            }
+
+            const stage = characterIntroData[characterIntroIndex];
+            characterIntroStageKey.innerText = stage.key;
+            characterIntroStageName.innerText = stage.name;
+            characterIntroStageKey.style.backgroundColor = stage.color;
+            characterIntroVideo.src = `${stage.video}?t=${Date.now()}`;
+            characterIntroVideo.muted = false;
+            characterIntroVideo.volume = 1;
+            characterIntroVideo.defaultMuted = false;
+            characterIntroVideo.currentTime = 0;
+            characterIntroVideoContainer.classList.remove('hidden');
+            characterIntroProgressWrap.style.display = 'flex';
+            characterIntroIsPlaying = true;
+            characterIntroPlayBtn.querySelector('i').className = 'ph-bold ph-pause';
+
+            const updateProgress = () => {
+                if (!characterIntroMode || characterIntroSequence.classList.contains('hidden')) return;
+                const duration = characterIntroVideo.duration || 0;
+                const currentTime = characterIntroVideo.currentTime || 0;
+                const percent = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+                characterIntroProgressFill.style.width = `${percent}%`;
+                characterIntroProgressThumb.style.left = `${percent}%`;
+                characterIntroProgressRaf = requestAnimationFrame(updateProgress);
+            };
+
+            cancelAnimationFrame(characterIntroProgressRaf);
+            characterIntroProgressRaf = requestAnimationFrame(updateProgress);
+
+            characterIntroVideo.play().catch(err => {
+                console.error(`[介紹序列] ${stage.name} 視頻播放失敗:`, err);
+                // 文件不存在或不支援，自動進到下一個
+                setTimeout(() => advanceToNextCharacterIntro(), 500);
+            });
+        }
+
+        function advanceToNextCharacterIntro() {
+            if (!characterIntroMode) return;
+            characterIntroIndex += 1;
+            if (characterIntroIndex < characterIntroData.length) {
+                playCharacterIntroVideo();
+            } else {
+                endCharacterIntroSequence();
+            }
+        }
+
+        function endCharacterIntroSequence() {
+            characterIntroMode = false;
+            characterIntroSequence.classList.remove('active');
+            characterIntroVideoContainer.classList.add('hidden');
+            characterIntroProgressWrap.style.display = 'none';
+            characterIntroVideo.pause();
+            characterIntroVideo.currentTime = 0;
+            characterIntroVideo.src = '';
+            cancelAnimationFrame(characterIntroProgressRaf);
+            if (characterIntroResolve) characterIntroResolve();
+        }
+
+        function runCharacterIntroSequence() {
+            dialogArea.classList.add('hidden');
+            nameTagContainer.classList.add('hidden');
+            metaOs.classList.add('hidden');
+            nextIndicator.classList.add('hidden');
+            choiceContainer.classList.add('hidden');
+            choiceContainer.classList.remove('flex');
+
+            characterIntroMode = true;
+            characterIntroIndex = 0;
+            characterIntroStartCard.classList.remove('hidden');
+            characterIntroVideoContainer.classList.add('hidden');
+            characterIntroProgressWrap.style.display = 'none';
+            characterIntroSequence.classList.add('active');
+
+            // 介紹字卡顯示後切到正式播放器
+            setTimeout(() => {
+                if (!characterIntroMode) return;
+                characterIntroStartCard.classList.add('hidden');
+                playCharacterIntroVideo();
+            }, 3100);
+
+            return new Promise((resolve) => {
+                characterIntroResolve = resolve;
+            });
+        }
+
+        function resetPreludeStages() {
+            preludeLoadingStage.classList.remove('active');
+            preludeVideoStage.classList.remove('active');
+            preludeThoughtStage.classList.remove('active');
+            preludeChoiceStage.classList.remove('active');
+        }
+
+        const preludeLoadingClickHint = document.getElementById('prelude-loading-click-hint');
+        let preludeLoadingClickHandler = null;
+        let preludeLoadingHintTimer = null;
+        let introLoadingClickHandler = null;
+        let introLoadingHintTimer = null;
+
+        function setLoadingBackground(bgPath) {
+            if (!bgPath) return;
+            document.documentElement.style.setProperty('--loading-image', `url('${bgPath}')`);
+        }
+
+        function runPreludeLoading(label = 'LOADING(BG1)', bgPath = './image/bg1.jpg') {
+            preludeSequence.classList.add('active');
+            resetPreludeStages();
+            preludeProgressWrap.style.display = 'none';
+            preludeLoadingLabel.innerText = label;
+            setLoadingBackground(bgPath);
+            preludeLoadingFill.style.width = '0%';
+            preludeLoadingClickHint.style.display = 'none';
+            preludeLoadingStage.classList.add('active');
+
+            if (preludeLoadingHintTimer) {
+                clearTimeout(preludeLoadingHintTimer);
+                preludeLoadingHintTimer = null;
+            }
+            if (preludeLoadingClickHandler) {
+                preludeLoadingStage.removeEventListener('click', preludeLoadingClickHandler);
+                preludeLoadingClickHandler = null;
+            }
+
+            return new Promise((resolve) => {
+                let readyToContinue = false;
+                requestAnimationFrame(() => {
+                    preludeLoadingFill.style.width = '100%';
+                });
+
+                preludeLoadingClickHandler = () => {
+                    if (!readyToContinue) return;
+                    if (preludeLoadingHintTimer) {
+                        clearTimeout(preludeLoadingHintTimer);
+                        preludeLoadingHintTimer = null;
+                    }
+                    preludeLoadingStage.removeEventListener('click', preludeLoadingClickHandler);
+                    preludeLoadingClickHandler = null;
+                    preludeLoadingClickHint.style.display = 'none';
+                    preludeLoadingStage.classList.remove('active');
+                    resolve();
+                };
+                preludeLoadingStage.addEventListener('click', preludeLoadingClickHandler);
+
+                // 填滿後顯示「點擊繼續」，等待點擊才離開
+                preludeLoadingHintTimer = setTimeout(() => {
+                    readyToContinue = true;
+                    preludeLoadingClickHint.style.display = 'block';
+                    preludeLoadingHintTimer = null;
+                }, 1400);
+            });
+        }
+
+        function runPreludeVideo(path) {
+            preludeSequence.classList.add('active');
+            resetPreludeStages();
+            preludeVideoStage.classList.add('active');
+            preludeProgressWrap.style.display = 'flex';
+            preludeVideo.src = `${path}?t=${Date.now()}`;
+            preludeVideo.muted = false;
+            preludeVideo.defaultMuted = false;
+            preludeVideo.volume = 1;
+            preludeVideo.currentTime = 0;
+
+            return new Promise((resolve) => {
+                let settled = false;
+                let controlsCleanup = () => {};
+                const updateProgress = () => {
+                    if (!preludeSequence.classList.contains('active') || !preludeVideoStage.classList.contains('active')) return;
+                    const duration = preludeVideo.duration || 0;
+                    const currentTime = preludeVideo.currentTime || 0;
+                    const percent = duration > 0 ? Math.min((currentTime / duration) * 100, 100) : 0;
+                    preludeProgressFill.style.width = `${percent}%`;
+                    preludeProgressThumb.style.left = `${percent}%`;
+                    preludeProgressRaf = requestAnimationFrame(updateProgress);
+                };
+                const settle = () => {
+                    if (settled) return;
+                    settled = true;
+                    clearTimeout(timeoutId);
+                    preludeVideo.removeEventListener('ended', onEnded);
+                    preludeVideo.removeEventListener('error', onError);
+                    cancelAnimationFrame(preludeProgressRaf);
+                    controlsCleanup();
+                    resolve();
+                };
+                const onEnded = () => {
+                    settle();
+                };
+                const onError = () => {
+                    settle();
+                };
+                const timeoutId = setTimeout(() => {
+                    settle();
+                }, 22000);
+                controlsCleanup = createVideoControls(preludeVideo, preludeVideoStage, settle);
+                preludeVideo.addEventListener('ended', onEnded);
+                preludeVideo.addEventListener('error', onError);
+                cancelAnimationFrame(preludeProgressRaf);
+                preludeProgressRaf = requestAnimationFrame(updateProgress);
+                preludeVideo.play().catch(() => settle());
+            });
+        }
+
+        function runPreludeThoughtText() {
+            preludeSequence.classList.add('active');
+            resetPreludeStages();
+            preludeThoughtStage.classList.add('active');
+
+            return new Promise((resolve) => {
+                const onClick = () => {
+                    preludeThoughtStage.removeEventListener('click', onClick);
+                    resolve();
+                };
+                preludeThoughtStage.addEventListener('click', onClick);
+            });
+        }
+
+        function runPreludeFakeChoice() {
+            preludeSequence.classList.add('active');
+            resetPreludeStages();
+            preludeChoiceStage.classList.add('active');
+
+            return new Promise((resolve) => {
+                const buttons = Array.from(preludeChoiceStage.querySelectorAll('.prelude-choice-btn'));
+                const handleChoice = () => {
+                    buttons.forEach((btn) => btn.removeEventListener('click', handleChoice));
+                    resolve();
+                };
+                buttons.forEach((btn) => btn.addEventListener('click', handleChoice));
+            });
+        }
+
+        function waitMs(ms) {
+            return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+
+        function runPhoneIntroSequenceAuto() {
+            return runIntroSequence();
+        }
+
+        function runNewOpeningFlow() {
+            preludeSequence.classList.remove('active');
+            dialogArea.classList.add('hidden');
+            nameTagContainer.classList.add('hidden');
+            metaOs.classList.add('hidden');
+            nextIndicator.classList.add('hidden');
+            openingFlowMode = true;
+
+            return runCharacterIntroSequence()
+                .then(() => runPreludeLoading('LOADING(BG1)', './image/bg1.jpg'))
+                .then(() => {
+                    preludeSequence.classList.remove('active');
+                    resetPreludeStages();
+                    return runPhoneIntroSequenceAuto();
+                })
+                .then(() => runPreludeVideo('./image/星巴克前的思索.mp4'))
+                .then(() => runPreludeThoughtText())
+                .then(() => runPreludeFakeChoice())
+                .then(() => runPreludeVideo('./image/星巴克思索後仍決定去.mp4'))
+                .then(() => {
+                    preludeSequence.classList.remove('active');
+                    preludeVideo.pause();
+                    preludeVideo.src = '';
+                    resetPreludeStages();
+                    openingFlowMode = false;
+                })
+                .catch(() => {
+                    preludeSequence.classList.remove('active');
+                    preludeVideo.pause();
+                    preludeVideo.src = '';
+                    resetPreludeStages();
+                    openingFlowMode = false;
+                });
+        }
+
+        function startMainStory(startStep = 0) {
+            currentStep = Math.max(0, Math.min(startStep, script.length - 1));
+            dialogArea.classList.remove('hidden');
+            saveProgress();
+            updateLoadButtonState();
+            setTimeout(executeStep, 280);
+        }
+
+        function hasSaveData() {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (!raw) return false;
+
+            try {
+                const data = JSON.parse(raw);
+                return Number.isInteger(data.currentStep);
+            } catch {
+                localStorage.removeItem(SAVE_KEY);
+                return false;
+            }
+        }
+
+        function updateLoadButtonState() {
+            const hasSave = hasSaveData();
+
+            if (hasSave) {
+                loadButton.classList.remove('menu-btn-disabled');
+                loadButtonLabel.innerText = '[ LOAD GAME ]';
+                loadButton.disabled = false;
+                loadButton.style.pointerEvents = 'auto';
+            } else {
+                loadButton.classList.add('menu-btn-disabled');
+                loadButtonLabel.innerText = '[ NO SAVE ]';
+                loadButton.disabled = true;
+                loadButton.style.pointerEvents = 'none';
+            }
+        }
+
+        // ================= 核心邏輯 =================
+
+        function startGame(startStep = 0) {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+
+            // 對話前先用卓同學 B 當畫面主角
+            setOpeningHeroFocus();
+
+            if (startStep === 0) {
+                runNewOpeningFlow().then(() => {
+                    startMainStory(0);
+                });
+                return;
+            }
+
+            startMainStory(startStep);
+        }
+
+        function loadGame() {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (!raw) {
+                updateLoadButtonState();
+                alert('目前沒有可讀取的存檔。');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(raw);
+                const savedStep = Number.isInteger(data.currentStep) ? data.currentStep : 0;
+                startGame(savedStep);
+            } catch (err) {
+                localStorage.removeItem(SAVE_KEY);
+                updateLoadButtonState();
+                alert('存檔損壞，已清除，請重新開始。');
+            }
+        }
+
+        function exitGame() {
+            if (!confirm('確定要離開遊戲嗎？')) return;
+
+            // 嘗試關閉分頁；若瀏覽器阻擋，退回 about:blank。
+            window.open('', '_self');
+            window.close();
+            setTimeout(() => {
+                location.href = 'about:blank';
+            }, 120);
+        }
+
+        function saveProgress() {
+            localStorage.setItem(SAVE_KEY, JSON.stringify({
+                currentStep,
+                updatedAt: Date.now()
+            }));
+            updateLoadButtonState();
+        }
+
+        function advanceDialog() {
+            if (openingFlowMode) return;
+            if (introMode) return;
+            if (choiceContainer.classList.contains('flex')) return; // 選項出現時鎖定背景點擊
+
+            if (isTyping) {
+                // 快進完成文字
+                clearInterval(typeInterval);
+                dialogTextEl.innerHTML = fullText;
+                dialogTextEl.classList.remove('typing-cursor');
+                isTyping = false;
+                nextIndicator.classList.remove('hidden');
+            } else {
+                // 進入下一步
+                currentStep++;
+                executeStep();
+            }
+        }
+
+        // 綁定空白鍵與 Enter
+        document.addEventListener('keydown', (e) => {
+            if ((e.code === 'Space' || e.code === 'Enter') && introMode) {
+                if (!cg2Triggered) goToCG2();
+                else continueIntroChat();
+                return;
+            }
+
+            if ((e.code === 'Space' || e.code === 'Enter') && !document.getElementById('game-screen').classList.contains('hidden')) {
+                advanceDialog();
+            }
+        });
+
+        // 角色介紹MP4播放器事件
+        characterIntroVideo.addEventListener('ended', () => {
+            if (characterIntroMode) {
+                advanceToNextCharacterIntro();
+            }
+        }, { once: false });
+
+        characterIntroPlayBtn.addEventListener('click', () => {
+            if (!characterIntroMode || characterIntroIsPlaying === undefined) return;
+            
+            if (characterIntroIsPlaying) {
+                characterIntroVideo.pause();
+                characterIntroIsPlaying = false;
+                characterIntroPlayBtn.querySelector('i').className = 'ph-bold ph-play';
+            } else {
+                characterIntroVideo.play().catch(() => {});
+                characterIntroIsPlaying = true;
+                characterIntroPlayBtn.querySelector('i').className = 'ph-bold ph-pause';
+            }
+        });
+
+        characterIntroSkipBtn.addEventListener('click', () => {
+            if (!characterIntroMode) return;
+            advanceToNextCharacterIntro();
+        });
+
+        characterIntroFastForwardBtn.addEventListener('click', () => {
+            if (!characterIntroMode || !characterIntroVideo.duration) return;
+            const newTime = Math.min(characterIntroVideo.currentTime + 10, characterIntroVideo.duration - 0.1);
+            characterIntroVideo.currentTime = newTime;
+        });
+
+        const bindProgressSeek = (trackEl, videoEl) => {
+            let seeking = false;
+
+            const seekToEvent = (event) => {
+                const rect = trackEl.getBoundingClientRect();
+                const ratio = Math.min(1, Math.max(0, (event.clientX - rect.left) / rect.width));
+                if (Number.isFinite(videoEl.duration) && videoEl.duration > 0) {
+                    videoEl.currentTime = ratio * videoEl.duration;
+                }
+            };
+
+            trackEl.addEventListener('pointerdown', (event) => {
+                seeking = true;
+                trackEl.setPointerCapture(event.pointerId);
+                seekToEvent(event);
+            });
+
+            trackEl.addEventListener('pointermove', (event) => {
+                if (!seeking) return;
+                seekToEvent(event);
+            });
+
+            const stopSeek = () => {
+                seeking = false;
+            };
+
+            trackEl.addEventListener('pointerup', stopSeek);
+            trackEl.addEventListener('pointercancel', stopSeek);
+            trackEl.addEventListener('pointerleave', stopSeek);
+            trackEl.addEventListener('click', seekToEvent);
+        };
+
+        bindProgressSeek(characterIntroProgressTrack, characterIntroVideo);
+        bindProgressSeek(preludeProgressTrack, preludeVideo);
+
+        function applySpriteImage(spriteId, overrideSrc) {
+            const imgEl = spriteImageEls[spriteId];
+            if (!imgEl) return;
+
+            const defaultSrc = imgEl.dataset.defaultSrc || imgEl.getAttribute('src');
+            const hasExplicitExtension = overrideSrc && /\.[a-z0-9]+$/i.test(overrideSrc);
+            const candidates = overrideSrc
+                ? (hasExplicitExtension ? [overrideSrc] : [`${overrideSrc}.png`, `${overrideSrc}.jpg`, `${overrideSrc}.jpeg`, `${overrideSrc}.webp`])
+                : [defaultSrc];
+            candidates.push(defaultSrc);
+
+            if (imgEl.dataset.currentSrc === candidates[0]) return;
+
+            const tryCandidate = (index) => {
+                const nextSrc = candidates[index] || defaultSrc;
+                imgEl.onerror = () => {
+                    if (index + 1 < candidates.length) {
+                        tryCandidate(index + 1);
+                        return;
+                    }
+                    imgEl.onerror = null;
+                    imgEl.src = defaultSrc;
+                    imgEl.dataset.currentSrc = defaultSrc;
+                };
+                imgEl.src = nextSrc;
+                imgEl.dataset.currentSrc = nextSrc;
+            };
+
+            tryCandidate(0);
+        }
+
+        function executeStep() {
+            if (currentStep >= script.length) {
+                showEndFlow();
+                return;
+            }
+            const step = script[currentStep];
+            saveProgress();
+
+            if (step.bgImage) {
+                applySceneBackground(step.bgImage);
+            }
+
+            // 處理立繪狀態 (active, focus, unfocus, crazy)
+            const handleSprite = (id, state) => {
+                const el = document.getElementById(id);
+                el.className = 'sprite'; // reset
+                if (!state) return;
+                
+                el.classList.add('active');
+                if (state === 'focus') el.classList.add('focus');
+                else if (state === 'active') el.classList.add('unfocus');
+                else if (state === 'crazy') { el.classList.add('focus'); el.classList.add('crazy-shake'); }
+            };
+            
+            handleSprite('sprite-A', step.sA);
+            handleSprite('sprite-B', step.sB);
+            handleSprite('sprite-C', step.sC);
+            applySpriteImage('sprite-A', step.aImage);
+            applySpriteImage('sprite-B', step.bImage);
+            applySpriteImage('sprite-C', step.cImage);
+
+            // 處理震動
+            if(step.shake) {
+                document.getElementById(step.shake === 'sA' ? 'sprite-A' : (step.shake === 'sB' ? 'sprite-B' : 'sprite-C')).classList.add('shake');
+            }
+
+            // 處理濾鏡
+            const filterEl = document.getElementById('screen-filter');
+            filterEl.className = '';
+            if(step.filter) filterEl.classList.add(step.filter);
+
+            // 重置 Meta OS 顯示
+            if (step.type !== 'meta') metaOs.classList.add('hidden');
+
+            // 分支處理
+            if (step.type === 'system') {
+                showSystemCard(step.title, step.text, step.icon, step.isWarning);
+                // 系統提示不卡進度，短暫延遲後自動跑下一行 (保留錄影流暢感)
+                currentStep++;
+                setTimeout(executeStep, 800); 
+            } 
+            else if (step.type === 'meta') {
+                metaOs.classList.remove('hidden');
+                document.getElementById('meta-os-text').innerText = step.text;
+                // Meta OS 懸停供錄影，需手動點擊/空白鍵進入下一步
+            }
+            else if (step.type === 'placeholder') {
+                // 佔位畫面：顯示提示文字，點擊繼續
+                const ph = document.createElement('div');
+                ph.id = 'placeholder-overlay';
+                ph.style.cssText = `position:absolute;inset:0;z-index:95;background:#111 url('./image/bg_莊敬.png') center center / contain no-repeat;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;`;
+                ph.innerHTML = `<div style="font-family:'DotGothic16',sans-serif;color:#f5f5f5;font-size:2rem;text-align:center;border:4px dashed rgba(255,255,255,0.55);padding:40px 60px;background:rgba(0,0,0,0.55);">${step.text || '（影片製作中…）'}</div><div style="margin-top:24px;color:#ddd;font-size:1rem;font-family:sans-serif;text-shadow:0 1px 2px rgba(0,0,0,0.8);">點擊繼續</div>`;
+                document.getElementById('game-screen').appendChild(ph);
+                ph.addEventListener('click', () => {
+                    applySceneBackground('./image/bg_莊敬');
+                    ph.remove();
+                    currentStep++;
+                    executeStep();
+                }, { once: true });
+            }
+            else if (step.type === 'angry-choice') {
+                showAngryChoices();
+            }
+            else if (step.type === 'video') {
+                playInlineVideo(step.path, step.duration || 6000);
+            }
+            else if (step.type === 'loading') {
+                return runPreludeLoading(step.label, step.bgPath).then(() => {
+                    preludeSequence.classList.remove('active');
+                    resetPreludeStages();
+                    currentStep++;
+                    executeStep();
+                });
+            }
+            else if (step.type === 'choice') {
+                showChoices(step.options);
+            } 
+            else if (step.type === 'end') {
+                showEndFlow();
+            }
+            else {
+                // 一般對話
+                nameTagContainer.classList.remove('hidden');
+                nameTag.innerText = step.speaker;
+                nameTag.style.backgroundColor = step.color;
+                
+                // 開始打字效果
+                isTyping = true;
+                nextIndicator.classList.add('hidden');
+                fullText = step.text;
+                charIndex = 0;
+                dialogTextEl.innerHTML = '';
+                dialogTextEl.classList.add('typing-cursor');
+                
+                clearInterval(typeInterval);
+                typeInterval = setInterval(() => {
+                    if (charIndex < fullText.length) {
+                        dialogTextEl.innerHTML += fullText.charAt(charIndex);
+                        charIndex++;
+                    } else {
+                        clearInterval(typeInterval);
+                        dialogTextEl.classList.remove('typing-cursor');
+                        isTyping = false;
+                        nextIndicator.classList.remove('hidden');
+                    }
+                }, 40); // 打字速度
+            }
+        }
+
+        // ================= 內嵌影片播放 =================
+        function ensureVideoPlaybackWithAudio(video, wrapper, labelText = '點擊啟用聲音播放') {
+            let unlockBtn = null;
+
+            const hideUnlock = () => {
+                if (unlockBtn && unlockBtn.parentNode) unlockBtn.remove();
+                unlockBtn = null;
+            };
+
+            const showUnlock = () => {
+                if (unlockBtn) return;
+                unlockBtn = document.createElement('button');
+                unlockBtn.type = 'button';
+                unlockBtn.style.cssText = 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:130;padding:14px 24px;font-family:DotGothic16,sans-serif;font-size:16px;background:var(--meme-yellow);color:#111;border:3px solid #111;box-shadow:6px 6px 0 #111;cursor:pointer;';
+                unlockBtn.innerText = labelText;
+                unlockBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    attemptPlay();
+                });
+                wrapper.appendChild(unlockBtn);
+            };
+
+            const attemptPlay = () => {
+                video.muted = false;
+                video.defaultMuted = false;
+                video.volume = 1;
+                const playPromise = video.play();
+                if (playPromise && typeof playPromise.then === 'function') {
+                    playPromise.then(() => hideUnlock()).catch(() => showUnlock());
+                }
+            };
+
+            attemptPlay();
+        }
+
+        function createVideoControls(video, hostEl, onSkip) {
+            const controls = document.createElement('div');
+            controls.className = 'video-controls-overlay';
+
+            const playBtn = document.createElement('button');
+            playBtn.type = 'button';
+            playBtn.className = 'control-btn';
+            playBtn.title = '開始 / 暫停';
+            playBtn.innerHTML = '<i class="ph-bold ph-pause"></i>';
+
+            const skipBtn = document.createElement('button');
+            skipBtn.type = 'button';
+            skipBtn.className = 'control-btn';
+            skipBtn.title = '跳過';
+            skipBtn.innerHTML = '<i class="ph-bold ph-skip-forward"></i>';
+
+            const fastForwardBtn = document.createElement('button');
+            fastForwardBtn.type = 'button';
+            fastForwardBtn.className = 'control-btn';
+            fastForwardBtn.title = '快轉 10 秒';
+            fastForwardBtn.innerHTML = '<i class="ph-bold ph-fast-forward"></i>';
+
+            const syncPlayIcon = () => {
+                const icon = playBtn.querySelector('i');
+                if (!icon) return;
+                icon.className = video.paused ? 'ph-bold ph-play' : 'ph-bold ph-pause';
+            };
+
+            const onPlayClick = (event) => {
+                event.stopPropagation();
+                if (video.paused) video.play().catch(() => {});
+                else video.pause();
+                syncPlayIcon();
+            };
+
+            const onSkipClick = (event) => {
+                event.stopPropagation();
+                onSkip();
+            };
+
+            const onFastForwardClick = (event) => {
+                event.stopPropagation();
+                if (!Number.isFinite(video.duration) || video.duration <= 0) return;
+                video.currentTime = Math.min(video.currentTime + 10, Math.max(video.duration - 0.1, 0));
+            };
+
+            playBtn.addEventListener('click', onPlayClick);
+            skipBtn.addEventListener('click', onSkipClick);
+            fastForwardBtn.addEventListener('click', onFastForwardClick);
+            video.addEventListener('play', syncPlayIcon);
+            video.addEventListener('pause', syncPlayIcon);
+            video.addEventListener('ended', syncPlayIcon);
+
+            controls.appendChild(playBtn);
+            controls.appendChild(skipBtn);
+            controls.appendChild(fastForwardBtn);
+            hostEl.appendChild(controls);
+            syncPlayIcon();
+
+            return () => {
+                playBtn.removeEventListener('click', onPlayClick);
+                skipBtn.removeEventListener('click', onSkipClick);
+                fastForwardBtn.removeEventListener('click', onFastForwardClick);
+                video.removeEventListener('play', syncPlayIcon);
+                video.removeEventListener('pause', syncPlayIcon);
+                video.removeEventListener('ended', syncPlayIcon);
+                if (controls.parentNode) controls.remove();
+            };
+        }
+
+        function playInlineVideo(videoPath, duration) {
+            const videoWrapper = document.createElement('div');
+            videoWrapper.id = 'inline-video-wrapper';
+            videoWrapper.style.cssText = `
+                position: absolute;
+                inset: 0;
+                z-index: 95;
+                background: #000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            const video = document.createElement('video');
+            video.src = `${videoPath}?t=${Date.now()}`;
+            video.style.cssText = 'width: 100%; height: 100%; object-fit: contain; background: #000;';
+            video.controls = false;
+            video.muted = false;
+            video.volume = 1;
+            video.defaultMuted = false;
+            video.playsInline = true;
+
+            // ── 時間軸快轉條（hover 顯示，同角色介紹風格）──
+            const progressWrap = document.createElement('div');
+            progressWrap.className = 'mp4-progress-wrap';
+            progressWrap.style.cssText = 'left:50%;transform:translateX(-50%);bottom:26px;';
+
+            const progressLabel = document.createElement('div');
+            progressLabel.className = 'mp4-progress-label';
+            progressLabel.textContent = '播放進度';
+
+            const progressTrack = document.createElement('div');
+            progressTrack.className = 'mp4-progress-track';
+
+            const progressFill = document.createElement('div');
+            progressFill.className = 'mp4-progress-fill';
+
+            const progressThumb = document.createElement('div');
+            progressThumb.className = 'mp4-progress-thumb';
+
+            progressTrack.appendChild(progressFill);
+            progressTrack.appendChild(progressThumb);
+            progressWrap.appendChild(progressLabel);
+            progressWrap.appendChild(progressTrack);
+            videoWrapper.appendChild(video);
+            videoWrapper.appendChild(progressWrap);
+            document.getElementById('game-screen').appendChild(videoWrapper);
+
+            // 進度更新
+            let progressRaf = 0;
+            const updateProgress = () => {
+                const d = video.duration || 0;
+                const t = video.currentTime || 0;
+                const pct = d > 0 ? Math.min((t / d) * 100, 100) : 0;
+                progressFill.style.width = `${pct}%`;
+                progressThumb.style.left = `${pct}%`;
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60).toString().padStart(2, '0');
+                progressLabel.textContent = `${m}:${s}`;
+                progressRaf = requestAnimationFrame(updateProgress);
+            };
+            progressRaf = requestAnimationFrame(updateProgress);
+
+            // 拖拉快轉
+            const seek = (e) => {
+                const rect = progressTrack.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                if (video.duration) video.currentTime = ratio * video.duration;
+            };
+            let dragging = false;
+            progressTrack.addEventListener('mousedown', (e) => { dragging = true; seek(e); });
+            document.addEventListener('mousemove', (e) => { if (dragging) seek(e); });
+            document.addEventListener('mouseup', () => { dragging = false; });
+
+            ensureVideoPlaybackWithAudio(video, videoWrapper);
+            let controlsCleanup = () => {};
+
+            const captureFrameAsSceneBg = () => {
+                if (!gamePlaceholderBg) return;
+                if (!video.videoWidth || !video.videoHeight) return;
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) return;
+                try {
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const frameDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                    currentSceneBg = frameDataUrl;
+                    gamePlaceholderBg.style.background = `#050505 url('${frameDataUrl}') center center / contain no-repeat`;
+                } catch { }
+            };
+            
+            const cleanup = () => {
+                cancelAnimationFrame(progressRaf);
+                controlsCleanup();
+                if (/蘭花園\.mp4/i.test(videoPath)) captureFrameAsSceneBg();
+                video.pause();
+                video.src = '';
+                videoWrapper.remove();
+                currentStep++;
+                executeStep();
+            };
+
+            controlsCleanup = createVideoControls(video, videoWrapper, cleanup);
+            
+            video.addEventListener('ended', cleanup);
+            setTimeout(() => { if (videoWrapper.parentNode) cleanup(); }, duration);
+        }
+
+        // ================= 憤怒三選一 =================
+        function showAngryChoices() {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `position:absolute;inset:0;z-index:150;background:rgba(0,0,0,0.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;`;
+
+            const title = document.createElement('div');
+            title.style.cssText = `font-family:'Black Han Sans',sans-serif;font-size:2.5rem;color:#FF0055;text-shadow:4px 4px 0 #000;margin-bottom:12px;text-align:center;`;
+            title.textContent = '── 你的選擇 ──';
+            overlay.appendChild(title);
+
+            const choices = [
+                { text: '不忍了！', color: '#FF0055', action: 'direct' },
+                { text: '再忍忍… (0/3)', color: '#00E5FF', action: 'patience' },
+                { text: '來亂的！', color: '#FFDE00', action: 'chaotic' }
+            ];
+
+            const cont = () => { overlay.remove(); currentStep++; executeStep(); };
+
+            choices.forEach(ch => {
+                const btn = document.createElement('button');
+                btn.style.cssText = `font-family:'Black Han Sans',sans-serif;font-size:2rem;padding:18px 60px;background:${ch.color};color:#111;border:4px solid #111;box-shadow:6px 6px 0 #111;cursor:pointer;min-width:480px;text-align:left;transition:transform 0.1s;`;
+                btn.textContent = ch.text;
+                btn.onmouseenter = () => { btn.style.transform = 'translate(-4px,-4px)'; btn.style.boxShadow = '10px 10px 0 #111'; };
+                btn.onmouseleave = () => { btn.style.transform = ''; btn.style.boxShadow = '6px 6px 0 #111'; };
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (ch.action === 'direct') {
+                        overlay.remove();
+                        playBoboDollVideo('./image/波波娃娃.mp4', cont);
+                    } else if (ch.action === 'chaotic') {
+                        overlay.remove();
+                        const flash = document.createElement('div');
+                        flash.style.cssText = `position:absolute;inset:0;z-index:150;background:#FFDE00;display:flex;align-items:center;justify-content:center;font-family:'Black Han Sans',sans-serif;font-size:4rem;color:#111;cursor:pointer;`;
+                        flash.textContent = '（來亂的沒有劇情）';
+                        document.getElementById('game-screen').appendChild(flash);
+                        setTimeout(() => { flash.remove(); currentStep++; executeStep(); }, 1500);
+                    } else if (ch.action === 'patience') {
+                        overlay.remove();
+                        showPatienceMeter(cont);
+                    }
+                };
+                overlay.appendChild(btn);
+            });
+
+            document.getElementById('game-screen').appendChild(overlay);
+        }
+
+        // ================= 忍耐進度條 (x3) =================
+        function showPatienceMeter(onComplete) {
+            let clicks = 0;
+            const total = 3;
+
+            const overlay = document.createElement('div');
+            overlay.id = 'patience-overlay';
+            overlay.style.cssText = `position:absolute;inset:0;z-index:150;background:rgba(0,0,0,0.8);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;cursor:pointer;`;
+
+            const label = document.createElement('div');
+            label.style.cssText = `font-family:'Black Han Sans',sans-serif;font-size:2rem;color:#fff;text-shadow:3px 3px 0 #FF0055;`;
+            label.textContent = `忍耐度 ${clicks}/${total}`;
+
+            const track = document.createElement('div');
+            track.style.cssText = `width:480px;height:36px;background:#333;border:4px solid #111;box-shadow:6px 6px 0 #111;overflow:hidden;position:relative;`;
+            const fill = document.createElement('div');
+            fill.style.cssText = `height:100%;width:0%;background:#00E5FF;border-right:3px solid #111;transition:width 0.3s cubic-bezier(0.175,0.885,0.32,1.275);`;
+            track.appendChild(fill);
+
+            const hint = document.createElement('div');
+            hint.style.cssText = `font-family:sans-serif;font-size:1rem;color:#888;`;
+            hint.textContent = '點擊畫面繼續忍耐…';
+
+            overlay.appendChild(label);
+            overlay.appendChild(track);
+            overlay.appendChild(hint);
+            document.getElementById('game-screen').appendChild(overlay);
+
+            overlay.addEventListener('click', () => {
+                clicks++;
+                label.textContent = `忍耐度 ${clicks}/${total}`;
+                fill.style.width = `${(clicks / total) * 100}%`;
+
+                if (clicks >= total) {
+                    hint.textContent = '…忍無可忍了！';
+                    hint.style.color = '#FF0055';
+                    setTimeout(() => {
+                        overlay.remove();
+                            playBoboDollVideo('./image/波波娃娃.mp4', onComplete);
+                    }, 800);
+                }
+            });
+        }
+
+        // ================= 波波娃娃 MP4 + 留存鍵 =================
+        // 波波娃娃時間軸：依 mp4 實際秒數自動觸發，無需手動按鈕
+        // sec: 觸發時間（秒），fn: 特效函式
+        const boboTimeline = [
+            { sec: 0,    fn: () => showTypeC('波波娃娃實驗', '示範者：手機裡的 67', false) }, // 0:14 → 出現即閃
+            { sec: 20,   fn: () => showTypeB('注意 ATTENTION', '25%', 'var(--meme-pink)') },
+            { sec: 33,   fn: () => showTypeB('保留 RETENTION', '50%', 'var(--meme-cyan)') },
+            { sec: 36,   fn: () => showTypeB('動機 MOTIVATION', '75%', 'var(--meme-yellow)') },
+            { sec: 38,   fn: () => { showTypeB('再現 REPRODUCTION', '100%', '#00FF00'); setTimeout(() => showTypeA('烤鴨解鎖!', '開始跳 67 了!', 'ph-flame', 'var(--meme-yellow)'), 300); } },
+            { sec: 40,   fn: () => showTypeC('行為傳染!!', '完全無視抱怨者', true) },
+            { sec: 44,   fn: () => showTypeD('卓同學', '潛伏期 99%') },
+        ];
+
+        function playBoboDollVideo(videoPath, onComplete) {
+            const triggered = new Set();
+
+            const wrapper = document.createElement('div');
+            wrapper.id = 'bobo-video-wrapper';
+            wrapper.style.cssText = `
+                position: absolute;
+                inset: 0;
+                z-index: 95;
+                background: #000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            `;
+
+            const video = document.createElement('video');
+            video.src = `${videoPath}?t=${Date.now()}`;
+            video.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000;';
+            video.controls = false;
+            video.muted = false;
+            video.defaultMuted = false;
+            video.volume = 1;
+            video.playsInline = true;
+            wrapper.appendChild(video);
+
+            // ── 時間軸快轉條（hover 顯示）──
+            const progressWrap = document.createElement('div');
+            progressWrap.className = 'mp4-progress-wrap';
+
+            const progressLabel = document.createElement('div');
+            progressLabel.className = 'mp4-progress-label';
+            progressLabel.textContent = '播放進度';
+
+            const progressTrack = document.createElement('div');
+            progressTrack.className = 'mp4-progress-track';
+
+            const progressFill = document.createElement('div');
+            progressFill.className = 'mp4-progress-fill';
+
+            const progressThumb = document.createElement('div');
+            progressThumb.className = 'mp4-progress-thumb';
+
+            progressTrack.appendChild(progressFill);
+            progressTrack.appendChild(progressThumb);
+            progressWrap.appendChild(progressLabel);
+            progressWrap.appendChild(progressTrack);
+            wrapper.appendChild(progressWrap);
+
+            // 讓 wrapper hover 能觸發進度條顯示
+            wrapper.addEventListener('mouseenter', () => { progressWrap.style.opacity = '1'; progressWrap.style.pointerEvents = 'auto'; });
+            wrapper.addEventListener('mouseleave', () => { progressWrap.style.opacity = '0'; progressWrap.style.pointerEvents = 'none'; });
+
+            let progressRaf = 0;
+            const updateProgress = () => {
+                const d = video.duration || 0;
+                const t = video.currentTime || 0;
+                const pct = d > 0 ? Math.min((t / d) * 100, 100) : 0;
+                progressFill.style.width = `${pct}%`;
+                progressThumb.style.left = `${pct}%`;
+                const m = Math.floor(t / 60);
+                const s = Math.floor(t % 60).toString().padStart(2, '0');
+                progressLabel.textContent = `${m}:${s}`;
+                progressRaf = requestAnimationFrame(updateProgress);
+            };
+            progressRaf = requestAnimationFrame(updateProgress);
+
+            let dragging = false;
+            const seek = (e) => {
+                const rect = progressTrack.getBoundingClientRect();
+                const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                if (video.duration) video.currentTime = ratio * video.duration;
+            };
+            progressTrack.addEventListener('mousedown', (e) => { dragging = true; seek(e); e.stopPropagation(); });
+            document.addEventListener('mousemove', (e) => { if (dragging) seek(e); });
+            document.addEventListener('mouseup', () => { dragging = false; });
+
+            document.getElementById('game-screen').appendChild(wrapper);
+            ensureVideoPlaybackWithAudio(video, wrapper, '點擊播放波波娃娃（有聲）');
+            let controlsCleanup = () => {};
+
+            // 影片開始立即觸發 sec:0 那一幀（出現即閃）
+            boboTimeline[0].fn();
+            triggered.add(0);
+
+            // timeupdate 自動按時間點觸發剩餘幀
+            video.addEventListener('timeupdate', () => {
+                const t = video.currentTime;
+                boboTimeline.forEach((item, i) => {
+                    if (item.sec > 0 && !triggered.has(i) && t >= item.sec) {
+                        triggered.add(i);
+                        item.fn();
+                    }
+                });
+            });
+
+            const finish = () => {
+                if (!wrapper.parentNode) return;
+                cancelAnimationFrame(progressRaf);
+                controlsCleanup();
+                video.pause(); video.src = '';
+                wrapper.remove();
+                onComplete();
+            };
+
+            controlsCleanup = createVideoControls(video, wrapper, finish);
+
+            // 影片結束自動進結局
+            video.addEventListener('ended', finish);
+            video.addEventListener('error', finish);
+            setTimeout(() => {
+                if (wrapper.parentNode) finish();
+            }, 90000);
+        }
+
+        // 全局字卡顯示函數（保留向下相容）
+        window.showBoboCard = function(type, ...args) {
+            if (type === 'A') showTypeA(...args);
+            else if (type === 'B') showTypeB(...args);
+            else if (type === 'C') showTypeC(...args);
+            else if (type === 'D') showTypeD(...args);
+        };
+        function showTypeA(title, subtitle, iconClass, bgColor) {
+            const toastContainer = document.getElementById('toast-container');
+            const card = document.createElement('div');
+            card.className = 'brutal-card type-a-meme';
+            card.style.background = bgColor;
+            if(bgColor === 'var(--meme-pink)') card.style.color = 'white';
+            
+            card.innerHTML = `
+                <div class="border-4 border-black p-2 bg-white transform -rotate-6">
+                    <i class="ph-bold ${iconClass} text-4xl text-black"></i>
+                </div>
+                <div>
+                    <div class="comic-font text-xl leading-none text-black bg-white px-1 inline-block border-2 border-black mb-1">${title}</div>
+                    <div class="impact-font text-2xl leading-none text-black" style="text-shadow: 2px 2px 0 white;">${subtitle}</div>
+                </div>
+            `;
+            toastContainer.appendChild(card);
+
+            setTimeout(() => {
+                card.classList.add('slide-out');
+                setTimeout(() => card.remove(), 400);
+            }, 2500);
+        }
+
+        function showTypeB(title, percentStr, fillColor) {
+            const toastContainer = document.getElementById('toast-container');
+            const existingB = toastContainer.querySelectorAll('.type-b-meme');
+            existingB.forEach(el => el.remove());
+
+            const card = document.createElement('div');
+            card.className = 'brutal-card type-b-meme';
+            
+            card.innerHTML = `
+                <div class="type-b-head">
+                    <div class="type-b-title">${title}</div>
+                    <div class="type-b-percent" style="color: ${fillColor}; text-shadow: 2px 2px 0 black;">${percentStr}</div>
+                </div>
+                <div class="bar-container">
+                    <div class="bar-fill" style="width: 0%; background: ${fillColor};"></div>
+                </div>
+            `;
+            toastContainer.appendChild(card);
+
+            setTimeout(() => {
+                const fill = card.querySelector('.bar-fill');
+                if(fill) fill.style.width = percentStr;
+            }, 50);
+
+            setTimeout(() => card.remove(), 2000);
+        }
+
+        function showTypeC(mainText, subText, isWarning = false) {
+            const toastContainer = document.getElementById('toast-container');
+            const card = document.createElement('div');
+            card.className = `type-c-meme ${isWarning ? 'warning' : ''}`;
+            
+            card.innerHTML = `
+                <div class="speedlines"></div>
+                <div class="sub-badge">${subText}</div>
+                <div class="huge-text">${mainText}</div>
+            `;
+            toastContainer.appendChild(card);
+
+            if(isWarning) {
+                document.getElementById('screen-filter').style.animation = "crazyShake 0.1s infinite";
+            }
+
+            setTimeout(() => {
+                card.remove();
+                document.getElementById('screen-filter').style.animation = "";
+            }, isWarning ? 2000 : 2500);
+        }
+
+        function showTypeD(name, status) {
+            const toastContainer = document.getElementById('toast-container');
+            const card = document.createElement('div');
+            card.className = 'brutal-card type-d-meme';
+            
+            card.innerHTML = `
+                <div class="avatar">
+                    <i class="ph-bold ph-user text-3xl text-white transform -skew-x-12"></i>
+                </div>
+                <div class="transform skew-x-10">
+                    <div class="impact-font text-xl text-black leading-none mb-1">${name}</div>
+                    <div class="comic-font text-xl bg-[var(--meme-yellow)] px-2 border-2 border-black inline-block">${status}</div>
+                </div>
+            `;
+            toastContainer.appendChild(card);
+
+            setTimeout(() => card.remove(), 4000);
+        }
+
+        // ================= UI 組件生成 =================
+
+        function showSystemCard(title, text, iconClass, isWarning = false) {
+            const container = document.getElementById('system-container');
+            const card = document.createElement('div');
+            
+            const bgColor = isWarning ? 'bg-[var(--meme-pink)] text-white' : 'bg-[var(--meme-cyan)] text-black';
+            
+            card.className = `system-card ${bgColor} brutal-border brutal-shadow p-4 w-[400px] flex items-center gap-4 border-l-[16px] border-[var(--meme-dark)]`;
+            card.innerHTML = `
+                <div class="text-5xl flex-shrink-0"><i class="ph-bold ${iconClass}"></i></div>
+                <div>
+                    <div class="impact-font text-xl mb-1">${title}</div>
+                    <div class="font-bold text-lg leading-snug">${text.replace('\n', '<br>')}</div>
+                </div>
+            `;
+            
+            container.appendChild(card);
+
+            // 4秒後淡出移除
+            setTimeout(() => {
+                card.style.transition = 'all 0.5s';
+                card.style.transform = 'translateX(120%)';
+                card.style.opacity = '0';
+                setTimeout(() => card.remove(), 500);
+            }, 4000);
+        }
+
+        function showChoices(options) {
+            choiceContainer.innerHTML = '';
+            choiceContainer.classList.remove('hidden');
+            choiceContainer.classList.add('flex');
+
+            options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'brutal-btn bg-[var(--meme-yellow)] text-[var(--meme-dark)] impact-font text-4xl py-6 px-10 w-[800px] text-left brutal-border brutal-shadow';
+                btn.innerText = opt;
+                
+                // 動態進場
+                btn.style.opacity = '0';
+                btn.style.transform = 'translateY(30px) rotate(-1deg)';
+                
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    // 點擊特效
+                    btn.classList.add('bg-[var(--meme-pink)]');
+                    btn.classList.add('text-white');
+                    
+                    // 延遲關閉，給錄影留反應時間
+                    setTimeout(() => {
+                        choiceContainer.classList.remove('flex');
+                        choiceContainer.classList.add('hidden');
+                        currentStep++;
+                        executeStep();
+                    }, 500);
+                };
+                
+                choiceContainer.appendChild(btn);
+
+                setTimeout(() => {
+                    btn.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'translateY(0) rotate(0)';
+                }, 150 * index);
+            });
+        }
+
+        // 首頁載入時先同步 LOAD/NO SAVE 狀態
+        updateLoadButtonState();
+
+    </script>
+</body>
+</html>
